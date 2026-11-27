@@ -1,4 +1,5 @@
 import argparse
+from collections import Counter
 from contextlib import closing
 import json
 import os
@@ -34,9 +35,13 @@ def question_for(level, used):
     return RNG.choice([qid for qid in ids if qid not in used])
 
 
-def question(qid):
+def question(qid, order=None):
     level, index = map(int, qid.split(":"))
-    return QUESTIONS[level - 1][index]
+    prompt, options, correct, *details = QUESTIONS[level - 1][index]
+    if order is not None:
+        options = [options[position] for position in order]
+        correct = order.index(correct)
+    return prompt, options, correct, *details
 
 
 class Game:
@@ -74,7 +79,7 @@ class Game:
             if now >= match["deadline"]:
                 start = match["deadline"]
                 match.update(phase="question", started=start, deadline=start + ROUND_SECONDS,
-                             used=[question_for(1, [])])
+                             used=[question_for(1, [])], optionOrder=RNG.sample(range(4), 4))
             return
         if any(stale) and match["phase"] == "question":
             winner = None if all(stale) else stale.index(False)
@@ -83,7 +88,7 @@ class Game:
             self.resolve(match, now)
         if match["phase"] != "reveal" or now < match["deadline"]:
             return
-        if min(match["hp"]) <= 0 or match["round"] == MAX_ROUNDS:
+        if self.result_locked(match):
             first, second = match["hp"]
             winner = None if first == second else int(second > first)
             self.finish(match, winner, "score", now)
@@ -94,7 +99,12 @@ class Game:
             match["round"] += 1
             match["level"] = min(len(QUESTIONS), match["level"] + int(any(match["result"]["correct"])))
             match["used"].append(question_for(match["level"], match["used"]))
-            match.update(phase="question", deadline=now + ROUND_SECONDS, answers=[None, None], result=None)
+            match.update(phase="question", deadline=now + ROUND_SECONDS, answers=[None, None],
+                         result=None, optionOrder=RNG.sample(range(4), 4))
+
+    @staticmethod
+    def result_locked(match):
+        return match["phase"] == "reveal" and (min(match["hp"]) <= 0 or match["round"] == MAX_ROUNDS)
 
     @staticmethod
     def finish(match, winner, reason, now):
@@ -107,7 +117,8 @@ class Game:
     @staticmethod
     def resolve(match, now):
         qid = match["used"][-1]
-        _, _, correct, *_ = question(qid)
+        order = match.get("optionOrder")
+        _, _, correct, *_ = question(qid, order)
         hits = [answer == correct for answer in match["answers"]]
         specials = [hit and charge == SPECIAL_THRESHOLD - 1
                     for hit, charge in zip(hits, Game.charge(match))]
@@ -124,7 +135,7 @@ class Game:
                 specials[attacker] = False
         match["result"] = {"correct": hits, "damaged": damaged, "choices": match["answers"],
                            "specials": specials, "damage": damage, "finisher": finisher}
-        match["log"].append({"question": qid, **match["result"]})
+        match["log"].append({"question": qid, "optionOrder": order, **match["result"]})
         reveal_seconds = (BOTH_ANSWERED_REVEAL_SECONDS if None not in match["answers"] else REVEAL_SECONDS)
         match.update(phase="reveal", deadline=now + reveal_seconds)
 
@@ -180,7 +191,7 @@ class Game:
         review = []
         hits = errors = unanswered = streak = best = 0
         for entry in match["log"]:
-            prompt, options, correct, _, topic, explanation = question(entry["question"])
+            prompt, options, correct, _, topic, explanation = question(entry["question"], entry.get("optionOrder"))
             choice = entry["choices"][side]
             if entry["correct"][side]:
                 hits += 1
@@ -206,15 +217,19 @@ class Game:
             row = db.execute("""SELECT * FROM matches WHERE ended>? AND (first=? OR second=?)
                                 ORDER BY ended DESC LIMIT 1""", (now - 900, token, token)).fetchone()
         history = []
+        missed_topics = Counter()
         for item in db.execute("""SELECT * FROM matches WHERE ended IS NOT NULL AND (first=? OR second=?)
                                   ORDER BY ended DESC LIMIT 10""", (token, token)):
             old = json.loads(item["data"])
             side = int(item["second"] == token)
+            missed_topics.update(question(entry["question"])[4] for entry in old["log"]
+                                 if entry["choices"][side] is not None and not entry["correct"][side])
             history.append({"id": old["id"], "opponent": old["players"][1-side]["name"],
                             "outcome": "Empate" if old["winner"] is None else ("Vitória" if old["winner"] == side else "Derrota"),
                             "rounds": len(old["log"])})
         state = {"profile": {"name": profile["name"], "chemist": profile["chemist"]},
                  "ready": profile["ready"] is not None, "now": now, "history": history, "match": None,
+                 "reviewTopics": [{"topic": topic, "misses": count} for topic, count in missed_topics.most_common(3)],
                  "rules": {"rounds": MAX_ROUNDS, "roundSeconds": ROUND_SECONDS, "responseSeconds": RESPONSE_SECONDS,
                            "specialThreshold": SPECIAL_THRESHOLD, "hitDamage": HIT_DAMAGE, "specialDamage": SPECIAL_DAMAGE},
                  "online": db.execute("SELECT COUNT(*) FROM players WHERE seen>=?", (now - PRESENCE_SECONDS,)).fetchone()[0]}
@@ -223,6 +238,7 @@ class Game:
             side = int(row["second"] == token)
             public = {key: match[key] for key in ("id", "players", "arena", "hp", "round", "level", "phase", "deadline", "result")}
             public["scores"] = self.scores(match)
+            public["resultLocked"] = self.result_locked(match)
             if match["phase"] != "finished":
                 seen = {item["token"]: item["seen"] for item in
                         db.execute("SELECT token,seen FROM players WHERE token IN (?,?)", (row["first"], row["second"]))}
@@ -233,16 +249,28 @@ class Game:
             public["answered"] = [choice is not None for choice in match["answers"]]
             public["choice"] = match["answers"][side]
             if match["phase"] == "finished":
-                started = match.get("started")
-                public.update(winner=match["winner"], reason=match["reason"], summary=self.summary(match, side),
-                              duration=max(0, round(match["ended"] - started)) if started is not None else None)
+                public.update(self.result_details(match, side))
             elif match["phase"] != "countdown":
-                prompt, options, correct, number, *_ = question(match["used"][-1])
+                prompt, options, correct, number, *_ = question(match["used"][-1], match.get("optionOrder"))
                 public.update(prompt=prompt, options=options, number=number)
                 if match["phase"] == "reveal":
                     public.update(correct=correct)
             state["match"] = public
         return state
+
+    def result_details(self, match, side):
+        started = match.get("started")
+        return {"players": match["players"], "scores": self.scores(match), "side": side,
+                "winner": match["winner"], "reason": match["reason"], "summary": self.summary(match, side),
+                "duration": max(0, round(match["ended"] - started)) if started is not None else None}
+
+    def history_result(self, token, match_id):
+        with closing(self.connect()) as db:
+            row = db.execute("""SELECT * FROM matches WHERE id=? AND ended IS NOT NULL
+                                AND (first=? OR second=?)""", (match_id, token, token)).fetchone()
+        if row is None:
+            return None
+        return self.result_details(json.loads(row["data"]), int(row["second"] == token))
 
     def request(self, token, action, payload):
         db = self.connect()
@@ -284,8 +312,10 @@ class Game:
                     match = json.loads(row["data"])
                     side = int(row["second"] == token)
                     if action == "/api/leave":
-                        if min(match["hp"]) == 0:
-                            error = "A rodada já terminou por nocaute."
+                        if match["phase"] == "countdown":
+                            error = "Cancele a prontidão antes de iniciar o duelo."
+                        elif self.result_locked(match):
+                            error = "O resultado do duelo já foi definido."
                         else:
                             self.finish(match, 1 - side, "forfeit", now)
                             self.save(db, match)
@@ -293,7 +323,8 @@ class Game:
                         choice = payload.get("choice")
                         if type(choice) is not int or not 0 <= choice < 4:
                             error = "Escolha uma das quatro alternativas."
-                        elif (match["phase"] != "question" or payload.get("round") != match["round"]
+                        elif (match["phase"] != "question" or type(payload.get("round")) is not int
+                              or payload["round"] != match["round"]
                               or match["answers"][side] is not None):
                             error = "A resposta desta rodada já foi encerrada."
                         else:
@@ -331,6 +362,9 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(data)))
         self.send_header("Cache-Control", "no-store")
         self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("Referrer-Policy", "same-origin")
+        self.send_header("Content-Security-Policy",
+                         "default-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'")
         if cookie:
             self.send_header("Set-Cookie", f"reacao={cookie}; Path=/; HttpOnly; SameSite=Lax; Max-Age=31536000")
         self.end_headers()
@@ -340,6 +374,13 @@ class Handler(BaseHTTPRequestHandler):
         route = self.path.split("?")[0]
         if route == "/api/state":
             self.api(route, {})
+        elif route.startswith("/api/history/"):
+            token = self.session_token()
+            result = self.server.game.history_result(token, route.removeprefix("/api/history/"))
+            if result is None:
+                self.send_error(404)
+            else:
+                self.respond(200, json.dumps(result).encode("utf-8"), "application/json")
         elif route in STATIC:
             filename, kind = STATIC[route]
             self.respond(200, (ROOT / filename).read_bytes(), kind)
@@ -362,11 +403,14 @@ class Handler(BaseHTTPRequestHandler):
             return
         self.api(self.path, payload)
 
-    def api(self, route, payload):
+    def session_token(self):
         cookies = SimpleCookie()
         cookies.load(self.headers.get("Cookie", ""))
         cookie = cookies.get("reacao")
-        current = cookie.value if cookie else ""
+        return cookie.value if cookie else ""
+
+    def api(self, route, payload):
+        current = self.session_token()
         token, state, error = self.server.game.request(current, route, payload)
         if error:
             state["error"] = error

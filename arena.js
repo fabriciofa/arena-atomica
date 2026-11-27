@@ -329,7 +329,13 @@ function createArena(canvas) {
     ctx.restore();
   }
 
+  let frame = null;
+  function redraw() {
+    if(frame===null) frame=requestAnimationFrame(paint);
+  }
+
   function paint(now) {
+    frame=null;
     const rect=canvas.getBoundingClientRect();
     if(rect.width && rect.height) {
       width=rect.width;
@@ -367,7 +373,7 @@ function createArena(canvas) {
         const retreat=struck ? flinch*.54 : dodge ? swing*.44 : 0;
         return {
           id,index,
-          bob:reduce.matches ? 0 : Math.sin(now/290+index)*.055,
+          bob:reduce.matches || elapsed>=2.4 ? 0 : Math.sin(now/290+index)*.055,
           x:roster.length===1 ? 0 : direction*(-3.65+(attacking ? swing*.36 : 0)-retreat),
           z:.65+(dodge ? swing*(index ? 1.4 : -1.4) : 0),
           guard:attacking?swing:0,
@@ -430,17 +436,23 @@ function createArena(canvas) {
         ctx.fillText('−'+motion.damage,sx,sy);
       }
     }
-    requestAnimationFrame(paint);
+    if(motion && now-motion.at<2400 && rect.width && rect.height) redraw();
   }
 
-  requestAnimationFrame(paint);
+  new ResizeObserver(redraw).observe(canvas);
+  addEventListener('resize',redraw);
+  reduce.addEventListener('change',redraw);
+  redraw();
   return {
-    show(arena,players) { theme=arena; roster=players; },
+    show(arena,players) { theme=arena; roster=players; redraw(); },
     animate(result) {
       knockout=null;
       motion={...result,damage:result.damage ?? 25,dodge:result.correct.every(Boolean),at:performance.now()};
+      redraw();
     },
-    showKnockout(side) { motion=null; knockout=side; },
-    clear() { motion=null; knockout=null; },
+    showKnockout(side) { motion=null; knockout=side; redraw(); },
+    clear() {
+      if(motion || knockout!==null) { motion=null; knockout=null; redraw(); }
+    },
   };
 }

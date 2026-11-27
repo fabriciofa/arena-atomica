@@ -117,7 +117,8 @@ function renderRoom(match) {
 
 function renderHistory() {
   const items=state?.history || [];
-  const signature=JSON.stringify([connected,items]);
+  const topics=state?.reviewTopics || [];
+  const signature=JSON.stringify([connected,items,topics]);
   if(signature===lastHistory) return;
   lastHistory=signature;
   if(!items.length) {
@@ -128,10 +129,22 @@ function renderHistory() {
   for(const item of items) {
     const row=make('li');
     const rounds=item.rounds===1 ? '1 rodada resolvida' : item.rounds+' rodadas resolvidas';
-    row.append(make('span','Contra '+item.opponent+' · '+rounds),make('strong',item.outcome));
+    const details=make('button','Detalhes','link-button');
+    details.type='button';
+    details.setAttribute('aria-label','Detalhes do duelo contra '+item.opponent);
+    details.addEventListener('click',()=>openHistoryResult(item.id));
+    const info=make('span','Contra '+item.opponent+' · '+rounds);
+    info.append(make('small',item.outcome));
+    row.append(info,details);
     list.append(row);
   }
-  $('history-list').replaceChildren(list);
+  const content=$('history-list');
+  content.replaceChildren(list);
+  if(topics.length) {
+    const suggested=make('p',topics.map(({topic,misses})=>
+      topic+' ('+misses+(misses===1 ? ' erro)' : ' erros)')).join(' · '),'panel-note');
+    content.append(make('h3','Sugestões de revisão'),make('p','Temas com mais erros nos seus últimos duelos.'),suggested);
+  }
 }
 
 function renderFighters(match,animatePoints) {
@@ -163,6 +176,52 @@ function renderFighters(match,animatePoints) {
   }));
 }
 
+function resultMetadata(match) {
+  const duration=match.duration===null ? 'Duração indisponível' :
+    Math.floor(match.duration/60)+' min '+String(match.duration%60).padStart(2,'0')+' s';
+  const winner=match.winner===null ? 'Empate' : 'Vencedor · '+match.players[match.winner].name;
+  return winner+' · '+duration;
+}
+
+function reviewItem(entry,explain=false) {
+  const label=option=>option.letter+') '+option.text;
+  const item=make('li');
+  const correct=entry.answer?.letter===entry.correct.letter;
+  item.append(make('strong',entry.prompt),make('span','Correta · '+label(entry.correct)));
+  if(!correct) item.append(make('span',entry.answer ? 'Sua resposta · '+label(entry.answer) : 'Sem resposta'));
+  else item.append(make('span','Você acertou','review-correct'));
+  if(explain) item.append(make('p',entry.explanation));
+  return item;
+}
+
+async function openHistoryResult(id) {
+  const dialog=$('history-detail');
+  const content=$('history-detail-content');
+  content.replaceChildren(make('p','Carregando…','panel-note'));
+  dialog.showModal();
+  const load=new AbortController();
+  dialog.addEventListener('close',()=>load.abort(),{once:true});
+  try {
+    const response=await fetch('/api/history/'+encodeURIComponent(id),{
+      signal:AbortSignal.any([load.signal,AbortSignal.timeout(5000)]),
+    });
+    if(!response.ok) throw new Error('Histórico indisponível');
+    const match=await response.json();
+    if(load.signal.aborted) return;
+    const players=make('ul',undefined,'history-score');
+    players.append(...match.players.map((player,index)=>make('li',
+      player.name+' · '+chemists[player.chemist].name+' · '+match.scores[index]+' pt')));
+    const key=make('details',undefined,'answer-key');
+    const list=make('ol');
+    list.append(...match.summary.review.map(entry=>reviewItem(entry,true)));
+    key.append(make('summary','Ver gabarito'),list);
+    content.replaceChildren(make('h3',outcome(match)),make('p',resultMetadata(match),'panel-note'),players);
+    if(match.summary.review.length) content.append(key);
+  } catch {
+    if(!load.signal.aborted) content.replaceChildren(make('p','Não foi possível carregar o duelo.','panel-note'));
+  }
+}
+
 function renderSummary(match) {
   const deck=$('battle-summary');
   if(deck.dataset.match===match.id) return;
@@ -171,10 +230,7 @@ function renderSummary(match) {
   const total=review.length;
   $('battle-points').textContent=points+(points===1 ? ' ponto' : ' pontos');
   $('battle-total').textContent=total ? 'de '+total+(total===1 ? ' possível' : ' possíveis') : 'Nenhuma rodada concluída';
-  const duration=match.duration===null ? 'Duração indisponível' :
-    Math.floor(match.duration/60)+' min '+String(match.duration%60).padStart(2,'0')+' s';
-  const winner=match.winner===null ? 'Empate' : 'Vencedor · '+match.players[match.winner].name;
-  $('result-meta').textContent=winner+' · '+duration;
+  $('result-meta').textContent=resultMetadata(match);
   $('result-players').replaceChildren(...match.players.map((player,index)=>{
     const line=make('div',undefined,'result-player');
     const name=make('span',undefined);
@@ -190,16 +246,6 @@ function renderSummary(match) {
     return group;
   }));
 
-  const label=option=>option.letter+') '+option.text;
-  function reviewItem(entry,explain=false) {
-    const item=make('li');
-    const correct=entry.answer?.letter===entry.correct.letter;
-    item.append(make('strong',entry.prompt),make('span','Correta · '+label(entry.correct)));
-    if(!correct) item.append(make('span',entry.answer ? 'Sua resposta · '+label(entry.answer) : 'Sem resposta'));
-    else item.append(make('span','Você acertou','review-correct'));
-    if(explain) item.append(make('p',entry.explanation));
-    return item;
-  }
   const topics=[...new Set(review.map(item=>item.topic))];
   const missed=review.filter(entry=>entry.answer?.letter!==entry.correct.letter);
   $('learning').hidden=!total;
@@ -269,6 +315,10 @@ function renderDuel(match) {
   $('quiz-heading').textContent=finished ? outcome(match) : 'Desafio químico';
   $('clock').hidden=finished;
   $('round-progress').hidden=finished;
+  const remaining=state.rules.rounds-match.round;
+  const remainingLabel=remaining===0 ? 'Última rodada' : remaining===1 ? '1 rodada após esta' : 'Até '+remaining+' rodadas após esta';
+  $('round-remaining').hidden=finished;
+  if($('round-remaining').textContent!==remainingLabel) $('round-remaining').textContent=remainingLabel;
   $('round-progress').max=state.rules.rounds;
   $('round-progress').value=match.round;
   const opponentOnline=match.connections?.[1-match.side];
@@ -277,7 +327,7 @@ function renderDuel(match) {
   $('replay').disabled=pending || !connected;
   $('question').hidden=finished;
   $('leave').hidden=finished;
-  $('leave').disabled=pending || !connected || Boolean(match.result?.finisher);
+  $('leave').disabled=pending || !connected || match.resultLocked;
   $('result-actions').hidden=!finished;
   $('battle-summary').hidden=!finished;
   $('arena-result').hidden=!reveal&&!finished;
@@ -308,7 +358,9 @@ function renderDuel(match) {
     button.addEventListener('click',()=>respond(index));
     return button;
   });
+  const focusedIndex=[...$('answers').children].indexOf(document.activeElement);
   $('answers').replaceChildren(...buttons);
+  if(focusedIndex>=0 && !buttons[focusedIndex]?.disabled) buttons[focusedIndex].focus({preventScroll:true});
   if(reveal) {
     const result=match.result;
     let message='Nenhum acerto';

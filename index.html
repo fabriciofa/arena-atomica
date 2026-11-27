@@ -64,6 +64,7 @@
       <section id="duel" hidden>
         <div class="panel-label"><span class="icon" aria-hidden="true">⚛</span><span id="level">FÁCIL</span><span id="clock" class="clock"></span></div>
         <h2 id="quiz-heading">Desafio químico</h2>
+        <p id="round-remaining" class="round-remaining" aria-live="polite"></p>
         <progress id="round-progress" class="round-progress" aria-label="Progresso das rodadas"></progress>
         <p id="connection-note" class="connection-note" role="status" hidden></p>
         <p id="question"></p>
@@ -97,6 +98,12 @@
     <h2 id="history-title">Últimos duelos</h2>
     <div id="history-list"></div>
   </section>
+  <dialog id="history-detail" aria-labelledby="history-detail-title">
+    <form method="dialog">
+      <div class="dialog-heading"><h2 id="history-detail-title">Detalhes do duelo</h2><button class="link-button">Fechar</button></div>
+      <div id="history-detail-content" aria-live="polite"></div>
+    </form>
+  </dialog>
   <dialog id="instructions" aria-labelledby="instructions-title">
     <form method="dialog">
       <div class="dialog-heading"><h2 id="instructions-title">Como jogar</h2><button value="close" class="link-button" aria-label="Fechar instruções">Fechar</button></div>

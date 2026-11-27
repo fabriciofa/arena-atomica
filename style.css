@@ -250,3 +250,8 @@ body:not([data-screen=result]) .result-effect{display:none}
   100%{transform:translate(var(--dx),var(--dy)) rotate(var(--tilt)) scale(.25);opacity:0}
 }
 @media(prefers-reduced-motion:reduce){.result-effect{display:none}}
+.round-remaining{margin:0 0 5px;color:var(--muted);font:700 11px var(--mono)}
+.history li small{display:block;color:var(--lime);font-weight:800}
+#history-detail h3{margin:15px 0 0}
+#history-detail .panel-note{min-height:0}
+.history-score{padding-left:20px;color:var(--muted);font-size:13px}
