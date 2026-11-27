@@ -46,15 +46,73 @@ class HttpTest(unittest.TestCase):
         return self.request("POST", path, json.dumps(data),
                             **{"Content-Type": "application/json", **headers})
 
-    def session(self):
-        status, headers, _ = self.request("GET", "/api/state")
+    password = "test-passphrase-solo"
+
+    def register(self, email, name="Marie", **headers):
+        return self.post("/api/auth/register", {
+            "name": name, "email": email, "password": self.password, "confirmation": self.password,
+        }, **headers)
+
+    def session(self, email, name="Marie"):
+        status, headers, _ = self.register(email, name)
         self.assertEqual(status, 200)
         return headers["Set-Cookie"].split(";")[0]
 
-    def test_local_origin_and_session_flags(self):
-        status, headers, body = self.request("GET", "/api/state")
+    def test_identity_survives_login_and_revokes_only_the_current_session(self):
+        for _ in range(2):
+            status, headers, body = self.request("GET", "/api/state")
+            self.assertEqual(status, 200)
+            self.assertNotIn("Set-Cookie", headers)
+            self.assertFalse(json.loads(body)["authenticated"])
+        with self.app.game.connect() as db:
+            self.assertEqual(db.execute("SELECT COUNT(*) FROM players").fetchone()[0], 0)
+        self.assertEqual(self.post("/api/ready", {"chemist": "curie"})[0], 401)
+        one = self.session("MARIE@example.com")
+        self.assertEqual(self.register("marie@example.com")[0], 400)
+        self.assertEqual(self.post("/api/auth/login", {"email": "marie@example.com", "password": "errada"})[0], 401)
+        _, headers, _ = self.post("/api/auth/login", {"email": "marie@example.com", "password": self.password})
+        two = headers["Set-Cookie"].split(";")[0]
+        self.assertNotEqual(one, two)
+        state = lambda cookie: json.loads(self.request("GET", "/api/state", Cookie=cookie)[2])
+        self.assertEqual(state(one)["account"], state(two)["account"])
+        _, headers, _ = self.post("/api/auth/logout", {}, Cookie=one)
+        self.assertIn("Max-Age=0", headers["Set-Cookie"])
+        self.assertFalse(state(one)["authenticated"])
+        self.assertTrue(state(two)["authenticated"])
+
+    def test_password_confirmation_and_session_expiry(self):
+        invalid = {"name": "Marie", "email": "marie@example.com", "password": self.password, "confirmation": "different"}
+        self.assertEqual(self.post("/api/auth/register", invalid)[0], 400)
+        with patch("server.time.time", return_value=100):
+            cookie = self.session("marie@example.com")
+        with patch("server.time.time", return_value=100 + server.SESSION_SECONDS):
+            _, _, body = self.request("GET", "/api/state", Cookie=cookie)
+            self.assertFalse(json.loads(body)["authenticated"])
+
+    def test_legacy_can_be_claimed_once_without_rewriting_participants(self):
+        legacy = "legacy-player"
+        with self.app.game.connect() as db:
+            db.execute("INSERT INTO players VALUES (?, 'Antiga', 'curie', 0, NULL)", (legacy,))
+            db.execute("INSERT INTO players VALUES ('other', 'Outra', 'curie', 0, NULL)")
+            match = {"players": [{"name": "Antiga", "chemist": "curie"}, {"name": "Outra", "chemist": "curie"}],
+                     "winner": 0, "reason": "score", "log": [], "ended": 100}
+            db.execute("INSERT INTO matches VALUES ('legacy-match', ?, 'other', ?, 100)", (legacy, json.dumps(match)))
+        cookie = "reacao=" + legacy
+        _, _, body = self.request("GET", "/api/state", Cookie=cookie)
+        self.assertTrue(json.loads(body)["legacyAvailable"])
+        self.assertEqual(self.request("GET", "/api/history/legacy-match", Cookie=cookie)[0], 404)
+        data = {"name": "Marie", "email": "legacy@example.com", "password": self.password,
+                "confirmation": self.password, "claimLegacy": True}
+        status, headers, _ = self.post("/api/auth/register", data, Cookie=cookie)
         self.assertEqual(status, 200)
-        self.assertIn("profile", json.loads(body))
+        session = headers["Set-Cookie"].split(";")[0]
+        self.assertEqual(self.request("GET", "/api/history/legacy-match", Cookie=session)[0], 200)
+        self.assertEqual(self.request("GET", "/api/history/legacy-match", Cookie=cookie)[0], 404)
+        self.assertEqual(self.post("/api/auth/register", dict(data, email="other@example.com"), Cookie=cookie)[0], 400)
+
+    def test_local_origin_and_session_flags(self):
+        status, headers, _ = self.register("local@example.com")
+        self.assertEqual(status, 200)
         issued = headers["Set-Cookie"]
         self.assertIn("HttpOnly", issued)
         self.assertIn("SameSite=Lax", issued)
@@ -67,7 +125,7 @@ class HttpTest(unittest.TestCase):
 
     def test_public_origin_rejects_cross_site_writes_and_issues_secure_cookie(self):
         self.app.origin = server.public_origin("https://Arena.Example:443/")
-        _, headers, _ = self.request("GET", "/api/state")
+        _, headers, _ = self.register("secure@example.com")
         issued = headers["Set-Cookie"]
         self.assertIn("; Secure", issued)
         cookie = issued.split(";")[0]
@@ -92,7 +150,9 @@ class HttpTest(unittest.TestCase):
         self.assertEqual(self.request("GET", "/api/history/missing")[0], 404)
         self.assertEqual(self.request("GET", "/questions.json")[0], 404)
         self.assertEqual(self.request("GET", "/study.js")[0], 200)
-        first, second, guest = [self.session() for _ in range(3)]
+        first = self.session("first@example.com", "Marie")
+        second = self.session("second@example.com", "Dmitri")
+        guest = self.session("guest@example.com", "Visitante")
         profile = self.request("GET", "/api/profile", Cookie=guest)
         self.assertEqual(profile[0], 200)
         self.assertNotIn("token", json.loads(profile[2]))

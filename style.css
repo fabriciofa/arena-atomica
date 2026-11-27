@@ -284,3 +284,10 @@ body:not([data-screen=result]) .result-effect{display:none}
 .study-lesson h3{margin:12px 0 3px;font-size:16px;color:var(--lime)}
 .study-lesson p{margin:0 0 12px;color:var(--muted);line-height:1.55}
 #study-practice{width:auto}
+
+.auth-panel{max-width:450px}
+.auth-panel form{display:grid;gap:12px}
+.auth-panel form label{display:grid;gap:4px;color:var(--muted);font-size:13px}
+.auth-panel form .auth-check{display:flex;align-items:center;gap:7px}
+.auth-panel form .link-button{justify-self:start}
+.auth-panel .panel-note{min-height:0;margin:8px 0}

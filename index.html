@@ -15,7 +15,7 @@
 <header class="top">
   <div class="top-inner">
     <a class="brand" href="/" aria-label="Reação, início"><span class="logo" aria-hidden="true">⚗</span>REAÇÃO<span class="accent">!</span></a>
-    <nav aria-label="Menu principal"><button id="menu-tab" aria-pressed="true">Lobby</button><button id="history-tab" aria-pressed="false">Histórico</button><button id="profile-tab" aria-pressed="false" disabled>Perfil</button></nav>
+    <nav id="account-nav" aria-label="Menu principal" hidden><button id="menu-tab" aria-pressed="true">Lobby</button><button id="history-tab" aria-pressed="false">Histórico</button><button id="profile-tab" aria-pressed="false" disabled>Perfil</button></nav>
     <button type="button" id="how" class="link-button" disabled>Como jogar</button>
     <span class="online" id="online" role="status">Conectando…</span>
   </div>
@@ -26,7 +26,24 @@
     <h1 id="title">Arena <em>Atômica</em></h1>
     <p id="subtitle">Escolha seu químico, entre na fila e enfrente outro jogador.</p>
   </div>
-  <div class="layout" id="arena-view">
+  <section id="auth-view" class="panel auth-panel" aria-labelledby="auth-title">
+    <h2 id="auth-title">Entrar na Arena</h2>
+    <form id="auth-form">
+      <label id="auth-name-row" hidden>Nome de exibição <input id="auth-name" name="name" autocomplete="nickname" minlength="2" maxlength="24"></label>
+      <label>E-mail <input id="auth-email" name="email" type="email" autocomplete="email" maxlength="254" required></label>
+      <label>Senha <input id="auth-password" name="password" type="password" autocomplete="current-password" maxlength="256" required></label>
+      <button id="auth-toggle-password" class="link-button" type="button" aria-pressed="false">Mostrar senha</button>
+      <label id="auth-confirm-row" hidden>Confirmar senha <input id="auth-confirm" name="confirmation" type="password" autocomplete="new-password" minlength="12" maxlength="256"></label>
+      <label id="auth-claim-row" class="auth-check" hidden><input type="checkbox" id="auth-claim"> Transferir os duelos do perfil antigo deste navegador</label>
+      <button id="auth-submit" type="submit" class="primary">Entrar</button>
+    </form>
+    <p id="auth-feedback" class="panel-note" role="status"></p>
+    <div class="study-actions">
+      <button id="auth-mode" type="button" class="link-button">Criar conta</button>
+      <button id="guest-study" type="button" class="link-button">Consultar laboratório</button>
+    </div>
+  </section>
+  <div class="layout" id="arena-view" hidden>
     <div class="arena-column">
     <section class="game" aria-label="Arena de batalha">
       <div class="hud"><span class="stage-name"><span aria-hidden="true">◈</span> <span id="arena-name">LABORATÓRIO DE CRISTAIS</span></span><span id="round-label">PRÉVIA DA ARENA</span></div>
@@ -51,7 +68,7 @@
         <div class="panel-label"><span class="icon" aria-hidden="true">⚛</span> ENTRADA DO LABORATÓRIO</div>
         <h2>Prepare o duelo</h2>
         <label class="field-label" for="player-name">Seu nome</label>
-        <input id="player-name" minlength="2" maxlength="24" required autocomplete="nickname" placeholder="Nome de jogador">
+        <input id="player-name" minlength="2" maxlength="24" readonly required autocomplete="nickname" placeholder="Nome de jogador">
         <fieldset>
           <legend>Escolha seu químico</legend>
           <div id="roster" class="roster"></div>
@@ -114,7 +131,11 @@
         <div><strong id="profile-name"></strong><small id="profile-chemist"></small></div>
       </div>
       <dl id="profile-stats" class="profile-stats"></dl>
-      <button type="button" id="profile-history" class="link-button">Ver histórico</button>
+      <p id="profile-account" class="panel-note"></p>
+      <div class="study-actions">
+        <button type="button" id="profile-history" class="link-button">Ver histórico</button>
+        <button type="button" id="logout" class="link-button">Sair da conta</button>
+      </div>
     </div>
     <button type="button" id="profile-retry" class="link-button" hidden>Tentar novamente</button>
   </section>

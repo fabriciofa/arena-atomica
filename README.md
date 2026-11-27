@@ -16,15 +16,21 @@ Sem Docker, com Python 3.14:
 python3 server.py --port 8000
 ```
 
-Abra `http://localhost:8000` em dois perfis de navegador ou em uma janela normal e uma anônima. Cada perfil recebe uma sessão independente. No Docker, o SQLite fica no volume `reacao-data`. Sem Docker, o arquivo padrão é `reacao.sqlite3`. Use `REACAO_PORT` para mudar a porta publicada pelo Compose.
+Abra `http://localhost:8000`. Para testar um duelo local, use duas contas em perfis separados do navegador ou em uma janela normal e uma anônima. No Docker, o SQLite fica no volume `reacao-data`. Sem Docker, o arquivo padrão é `reacao.sqlite3`. Use `REACAO_PORT` para mudar a porta publicada pelo Compose.
 
 ## Como jogar
 
-1. Escolha um nome e um químico, depois clique em **Ficar pronto**. A fila reúne dois jogadores prontos e inicia uma contagem de três segundos.
+1. Entre na sua conta, escolha um químico e clique em **Ficar pronto**. A fila reúne dois jogadores prontos e inicia uma contagem de três segundos.
 2. Responda clicando em uma alternativa ou com as teclas **1 a 4**. Há 35 segundos para a primeira resposta. Depois dela, o outro jogador recebe 15 segundos.
 3. Cada acerto vale um ponto. Se só um acertar, o outro perde vida. A cada três acertos, o jogador carrega um especial. Os dois acertando, ambos esquivam.
 4. Vence quem derrubar o oponente ou terminar a décima rodada com mais vida. Vidas iguais dão empate. A pontuação serve para acompanhar o desempenho no quiz.
 5. Consulte as explicações em **O que você aprendeu?**. O histórico permite abrir os detalhes dos seus duelos recentes e sugere os temas com mais erros nas alternativas marcadas. **Jogar novamente** volta à fila geral. Em **Perfil**, consulte o total de duelos, pontos e a precisão nas respostas marcadas.
+
+## Contas e dados antigos
+
+Cadastre um nome de exibição, e-mail e senha com pelo menos 12 caracteres. Use o mesmo e-mail e senha em outro navegador para abrir o mesmo perfil. Cada sessão dura até 30 dias e pode ser encerrada pelo perfil. A senha é derivada com scrypt e sal aleatório. A consulta pública de estado não cria jogadores.
+
+No cadastro, **Transferir os duelos do perfil antigo deste navegador** aparece se houver um cookie antigo válido. Marque para vincular esse perfil à nova conta. O vínculo é único e mantém as referências das partidas. Registros antigos sem prova de titularidade ficam preservados no banco.
 
 ## Laboratório e treino solo
 
@@ -36,7 +42,7 @@ O banco solo tem 24 questões autorais, organizadas por assunto e dificuldade. C
 
 - `index.html`, `style.css` e `game.js` implementam lobby, duelo e revisão. `arena.js` desenha personagens, cenários e efeitos com Canvas 2D.
 - `server.py` serve a interface e a API HTTP. O navegador consulta o estado periodicamente. Prazos, respostas, pontuação e resultado são decididos e validados no servidor.
-- O SQLite guarda `players` e `matches`. Uma partida referencia dois jogadores e persiste seu estado e as rodadas em JSON. A ordem das alternativas é comum aos dois jogadores da rodada e fica registrada para reabrir o gabarito. Duelos anteriores ao embaralhamento usam a ordem original.
+- O SQLite guarda `accounts`, `sessions`, `players` e `matches`. Cada conta tem um identificador permanente e vincula um jogador às suas atividades. O banco armazena somente o hash dos tokens de sessão. Uma partida referencia dois jogadores e persiste seu estado e as rodadas em JSON. A ordem das alternativas é comum aos dois jogadores da rodada e fica registrada para reabrir o gabarito. Duelos anteriores ao embaralhamento usam a ordem original.
 - `questions.json` contém as 90 questões derivadas do `Simulado_P2_90_questoes.pdf`, com dificuldade, tema, alternativa correta e explicação. A fonte informa a origem do banco. A revisão científica independente ainda está pendente.
 
 ## Publicação com HTTPS
@@ -62,4 +68,4 @@ A suíte cobre contagem regressiva, cancelamento, respostas simultâneas, duplic
 
 ## Limitações
 
-A identidade atual é vinculada ao cookie do navegador. Contas recuperáveis, ranking e recompensas são módulos futuros. Exposição pública ainda exige um proxy HTTPS e avaliação de limites de requisição, retenção de dados e capacidade sob carga.
+Recuperação de senha por e-mail depende de um serviço de entrega ainda não definido. Ranking e recompensas são módulos futuros. Exposição pública ainda exige um proxy HTTPS e avaliação de limites de requisição, retenção de dados e capacidade sob carga.

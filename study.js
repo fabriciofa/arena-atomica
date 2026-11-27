@@ -36,7 +36,7 @@ const study = (() => {
     $('study-concept').textContent=lesson.concept;
     $('study-example').textContent=lesson.example;
     $('study-takeaway').textContent=lesson.takeaway;
-    $('study-practice').hidden=!Object.hasOwn(trainingBank,select.value);
+    $('study-practice').hidden=!state?.authenticated || !Object.hasOwn(trainingBank,select.value);
   }
 
   function open(topic) {

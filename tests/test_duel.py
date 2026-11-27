@@ -13,6 +13,7 @@ class DuelTest(unittest.TestCase):
         self.path = Path(folder) / "duel.sqlite3"
         self.game = server.Game(self.path)
         self.now = 1000
+        self.created_players = 0
         self.enterContext(patch("server.time.time", side_effect=lambda: self.now))
         self.first, queued, _ = self.request("", "ready", name="Marie", chemist="curie")
         self.assertTrue(queued["ready"])
@@ -20,6 +21,15 @@ class DuelTest(unittest.TestCase):
         self.assertEqual(paired["match"]["phase"], "countdown")
 
     def request(self, player, action="state", **data):
+        if not player:
+            self.created_players += 1
+            password = "test-passphrase-solo"
+            session, error = self.game.accounts.register({
+                "name": data.get("name", "Visitante"), "email": f"test{self.created_players}@example.com",
+                "password": password, "confirmation": password,
+            }, "", self.now)
+            self.assertIsNone(error)
+            player = self.game.accounts.resolve(session, self.now)["player"]
         return self.game.request(player, "/api/" + action, data)
 
     def match(self, player=None):

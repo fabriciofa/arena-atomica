@@ -63,7 +63,10 @@ function sayError(message='') {
 }
 
 function setView(next) {
+  if(!state?.authenticated && next!=='study') next='auth';
   view=next;
+  $('auth-view').hidden=next!=='auth';
+  $('account-nav').hidden=!state?.authenticated;
   $('arena-view').hidden=next!=='arena';
   $('history-view').hidden=next!=='history';
   $('profile-view').hidden=next!=='profile';
@@ -87,6 +90,7 @@ $('profile-retry').addEventListener('click',loadProfile);
 let profileLoad;
 async function loadProfile() {
   const requestId=Symbol();
+  const accountId=state?.account?.id;
   profileLoad=requestId;
   $('profile-status').textContent='Carregando seu perfil…';
   $('profile-status').hidden=false;
@@ -96,9 +100,11 @@ async function loadProfile() {
     const response=await fetch('/api/profile',{signal:AbortSignal.timeout(5000)});
     if(!response.ok) throw new Error('Perfil indisponível');
     const data=await response.json();
-    if(profileLoad!==requestId) return;
+    if(profileLoad!==requestId || state?.account?.id!==accountId) return;
     const chemist=chemists[data.chemist];
     $('profile-name').textContent=data.name;
+    const account=state.account;
+    $('profile-account').textContent=account.email+' · Conta '+account.id+' · Desde '+new Date(account.created*1000).toLocaleDateString('pt-BR');
     $('profile-chemist').textContent='Último químico escolhido · '+chemist.name;
     $('profile-element').textContent=chemist.symbol;
     $('profile-element').style.setProperty('--chip',chemist.color);
@@ -117,7 +123,7 @@ async function loadProfile() {
     $('profile-status').hidden=matches>0;
     $('profile-content').hidden=false;
   } catch {
-    if(profileLoad!==requestId) return;
+    if(profileLoad!==requestId || state?.account?.id!==accountId) return;
     $('profile-status').textContent='Não foi possível carregar o perfil.';
     $('profile-retry').hidden=false;
   }
@@ -444,6 +450,15 @@ function outcome(match) {
 }
 
 function render() {
+  if(!state?.authenticated) {
+    document.body.dataset.screen=view==='study' ? 'study' : 'auth';
+    $('eyebrow').textContent=view==='study' ? 'LABORATÓRIO' : 'CONTA';
+    $('subtitle').textContent=view==='study' ? 'Revise conceitos com exemplos.' : 'Entre para duelar e manter seu histórico.';
+    $('online').textContent=connected ? 'Visitante' : 'Sem conexão';
+    $('online').classList.remove('connected');
+    $('how').disabled=true;
+    return;
+  }
   const count=state?.online;
   $('online').textContent=connected ? count+' online' : 'Sem conexão';
   $('online').classList.toggle('connected',connected);
@@ -520,11 +535,29 @@ async function request(action,payload) {
   try {
     const options=payload ? {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)} : {};
     const response=await fetch('/api/'+action,{...options,signal:AbortSignal.timeout(5000)});
+    if(response.status===401 && action!=='state') return request('state');
     if(!response.ok && response.status!==409) throw new Error('Falha HTTP '+response.status);
     const next=await response.json();
-    if(!state) {
+    if(!next.authenticated) {
+      const expired=state?.authenticated;
+      state=next;
+      connected=true;
+      if(expired) {
+        $('profile-content').hidden=true;
+        $('profile-account').textContent='';
+        if($('history-detail').open) $('history-detail').close();
+        if($('instructions').open) $('instructions').close();
+        lastHistory='';
+      }
+      if(expired || view!=='study') setView('auth');
+      if(expired) $('auth-feedback').textContent='Sua sessão terminou. Entre novamente para continuar.';
+      updateAuthForm();
+      return;
+    }
+    const newAccount=state?.account?.id!==next.account.id;
+    if(newAccount) {
       renderSettings(next.rules);
-      if(!$('player-name').value) $('player-name').value=next.profile.name;
+      $('player-name').value=next.profile.name;
       document.querySelector('[name=chemist][value="'+next.profile.chemist+'"]').checked=true;
     }
     const oldMatch=state?.match?.id;
@@ -536,18 +569,20 @@ async function request(action,payload) {
       sayError(state.error);
       $('error').dataset.connection='false';
     }
+    if(newAccount) setView('arena');
     if(state.match?.id && state.match.id!==oldMatch && state.match.phase!=='finished' && view!=='arena') setView('arena');
   } catch {
     connected=false;
     $('error').dataset.connection='true';
     sayError('Conexão interrompida. Tentando reconectar…');
+    if(!state?.authenticated) $('auth-feedback').textContent='Conexão interrompida. Tentando reconectar…';
   }
   render();
   updateClock();
 }
 
 async function poll() {
-  if(inFlight || pending) return;
+  if(inFlight || pending || (connected && state?.authenticated===false)) return;
   inFlight=request('state');
   try { await inFlight; } finally { inFlight=null; }
 }
@@ -564,6 +599,78 @@ async function action(name,payload) {
     render();
   }
 }
+
+let authMode='login';
+function updateAuthForm() {
+  const register=authMode==='register';
+  $('auth-title').textContent=register ? 'Criar conta' : 'Entrar na Arena';
+  $('auth-name-row').hidden=!register;
+  $('auth-confirm-row').hidden=!register;
+  $('auth-name').required=register;
+  $('auth-confirm').required=register;
+  $('auth-password').minLength=register ? 12 : 0;
+  $('auth-password').autocomplete=register ? 'new-password' : 'current-password';
+  $('auth-claim-row').hidden=!register || !state?.legacyAvailable;
+  $('auth-submit').textContent=register ? 'Criar conta' : 'Entrar';
+  $('auth-mode').textContent=register ? 'Já tenho conta' : 'Criar conta';
+}
+
+async function authAction(mode,payload) {
+  if(pending) return;
+  pending=true;
+  $('auth-submit').disabled=true;
+  $('logout').disabled=true;
+  try {
+    if(inFlight) await inFlight;
+    const response=await fetch('/api/auth/'+mode,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload),signal:AbortSignal.timeout(10000),
+    });
+    const result=await response.json();
+    if(!response.ok) {
+      $('auth-feedback').textContent=result.error || 'Não foi possível continuar.';
+      return;
+    }
+    $('auth-form').reset();
+    $('auth-password').type='password';
+    $('auth-toggle-password').textContent='Mostrar senha';
+    $('auth-toggle-password').setAttribute('aria-pressed','false');
+    authMode='login';
+    $('auth-feedback').textContent='';
+    await request('state');
+    if(mode==='logout' && !state?.authenticated) $('auth-feedback').textContent='Sessão encerrada.';
+  } catch {
+    const message='Não foi possível concluir a operação. Tente novamente.';
+    if(mode==='logout') sayError(message);
+    else $('auth-feedback').textContent=message;
+  } finally {
+    pending=false;
+    $('auth-submit').disabled=false;
+    $('logout').disabled=false;
+    render();
+  }
+}
+
+$('auth-mode').addEventListener('click',()=>{
+  authMode=authMode==='login' ? 'register' : 'login';
+  $('auth-feedback').textContent='';
+  updateAuthForm();
+});
+$('auth-toggle-password').addEventListener('click',()=>{
+  const shown=$('auth-password').type==='password';
+  $('auth-password').type=shown ? 'text' : 'password';
+  $('auth-toggle-password').textContent=shown ? 'Ocultar senha' : 'Mostrar senha';
+  $('auth-toggle-password').setAttribute('aria-pressed',String(shown));
+});
+$('auth-form').addEventListener('submit',event=>{
+  event.preventDefault();
+  authAction(authMode,{
+    name:$('auth-name').value,email:$('auth-email').value,password:$('auth-password').value,
+    confirmation:$('auth-confirm').value,claimLegacy:!$('auth-claim-row').hidden && $('auth-claim').checked,
+  });
+});
+$('logout').addEventListener('click',()=>authAction('logout',{}));
+$('guest-study').addEventListener('click',()=>study.open());
 
 $('lobby').addEventListener('submit',event=>{
   event.preventDefault();

@@ -6,6 +6,9 @@ import os
 import secrets
 import sqlite3
 import time
+from threading import BoundedSemaphore, Lock
+
+from accounts import Accounts, SESSION_SECONDS
 from http.cookies import CookieError, SimpleCookie
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -65,6 +68,7 @@ class Game:
                 CREATE INDEX IF NOT EXISTS first_matches ON matches(first, ended);
                 CREATE INDEX IF NOT EXISTS second_matches ON matches(second, ended);
             """)
+        self.accounts = Accounts(self.connect)
 
     def connect(self):
         db = sqlite3.connect(self.path, timeout=5, isolation_level=None)
@@ -143,7 +147,7 @@ class Game:
         match.update(phase="reveal", deadline=now + reveal_seconds)
 
     def pair(self, db, now):
-        rows = db.execute("SELECT token,name,chemist FROM players WHERE ready IS NOT NULL AND seen>=?",
+        rows = db.execute("SELECT token,name,chemist FROM players WHERE ready IS NOT NULL AND seen>=? AND token IN (SELECT player FROM accounts)",
                           (now - PRESENCE_SECONDS,)).fetchall()
         RNG.shuffle(rows)
         for first, second in zip(rows[::2], rows[1::2]):
@@ -235,7 +239,8 @@ class Game:
                  "reviewTopics": [{"topic": topic, "misses": count} for topic, count in missed_topics.most_common(3)],
                  "rules": {"rounds": MAX_ROUNDS, "roundSeconds": ROUND_SECONDS, "responseSeconds": RESPONSE_SECONDS,
                            "specialThreshold": SPECIAL_THRESHOLD, "hitDamage": HIT_DAMAGE, "specialDamage": SPECIAL_DAMAGE},
-                 "online": db.execute("SELECT COUNT(*) FROM players WHERE seen>=?", (now - PRESENCE_SECONDS,)).fetchone()[0]}
+                 "online": db.execute("SELECT COUNT(*) FROM players JOIN accounts ON accounts.player=players.token WHERE seen>=?",
+                                      (now - PRESENCE_SECONDS,)).fetchone()[0]}
         if row:
             match = json.loads(row["data"])
             side = int(row["second"] == token)
@@ -305,13 +310,7 @@ class Game:
         try:
             db.execute("BEGIN IMMEDIATE")
             now = time.time()
-            player = db.execute("SELECT token FROM players WHERE token=?", (token,)).fetchone()
-            if player:
-                db.execute("UPDATE players SET seen=? WHERE token=?", (now, token))
-            else:
-                token = secrets.token_urlsafe(32)
-                db.execute("INSERT INTO players VALUES (?, ?, ?, ?, NULL)",
-                           (token, f"Jogador {token[:4].upper()}", "curie", now))
+            db.execute("UPDATE players SET seen=? WHERE token=?", (now, token))
             self.tick(db, now)
             row = self.active_row(db, token)
             error = None
@@ -319,13 +318,11 @@ class Game:
                 if row:
                     error = "Você já está em um duelo."
                 else:
-                    name, chemist = payload.get("name"), payload.get("chemist")
-                    if (not isinstance(name, str) or not 2 <= len(name.strip()) <= 24
-                            or not name.isprintable() or chemist not in CHEMISTS):
-                        error = "Escolha um químico e digite um nome de 2 a 24 caracteres."
+                    chemist = payload.get("chemist")
+                    if chemist not in CHEMISTS:
+                        error = "Escolha um químico válido."
                     else:
-                        db.execute("UPDATE players SET name=?, chemist=?, ready=? WHERE token=?",
-                                   (name.strip(), chemist, now, token))
+                        db.execute("UPDATE players SET chemist=?, ready=? WHERE token=?", (chemist, now, token))
             elif action == "/api/cancel":
                 if row and json.loads(row["data"])["phase"] == "countdown":
                     opponent = row["first"] if row["second"] == token else row["second"]
@@ -392,6 +389,23 @@ class Server(ThreadingHTTPServer):
     next_tick = 0
     origin = ""
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.auth_attempts = {}
+        self.auth_lock = Lock()
+        self.auth_workers = BoundedSemaphore(4)
+
+    def allow_auth(self, address):
+        window = int(time.monotonic() // 60)
+        with self.auth_lock:
+            if self.auth_attempts and next(iter(self.auth_attempts.values()))[0] != window:
+                self.auth_attempts.clear()
+            _, count = self.auth_attempts.get(address, (window, 0))
+            if count >= 15 or (address not in self.auth_attempts and len(self.auth_attempts) >= 1024):
+                return False
+            self.auth_attempts[address] = (window, count + 1)
+            return True
+
     def service_actions(self):
         if time.monotonic() < self.next_tick:
             return
@@ -414,10 +428,10 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Referrer-Policy", "same-origin")
         self.send_header("Content-Security-Policy",
                          "default-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'")
-        if cookie:
+        if cookie is not None:
             secure = "; Secure" if self.server.origin.startswith("https://") else ""
             self.send_header("Set-Cookie",
-                             f"reacao={cookie}; Path=/; HttpOnly; SameSite=Lax; Max-Age=31536000{secure}")
+                             f"reacao_session={cookie}; Path=/; HttpOnly; SameSite=Lax; Max-Age={SESSION_SECONDS if cookie else 0}{secure}")
         self.end_headers()
         self.wfile.write(data)
 
@@ -426,14 +440,15 @@ class Handler(BaseHTTPRequestHandler):
         if route == "/api/state":
             self.api(route, {})
         elif route == "/api/profile":
-            profile = self.server.game.player_profile(self.session_token())
+            account = self.account()
+            profile = self.server.game.player_profile(account["player"]) if account else None
             if profile is None:
                 self.send_error(404)
             else:
                 self.respond(200, json.dumps(profile).encode("utf-8"), "application/json")
         elif route.startswith("/api/history/"):
-            token = self.session_token()
-            result = self.server.game.history_result(token, route.removeprefix("/api/history/"))
+            account = self.account()
+            result = self.server.game.history_result(account["player"], route.removeprefix("/api/history/")) if account else None
             if result is None:
                 self.send_error(404)
             else:
@@ -445,7 +460,8 @@ class Handler(BaseHTTPRequestHandler):
             self.send_error(404)
 
     def do_POST(self):
-        if self.path not in ("/api/ready", "/api/cancel", "/api/answer", "/api/leave"):
+        if self.path not in ("/api/ready", "/api/cancel", "/api/answer", "/api/leave",
+                             "/api/auth/register", "/api/auth/login", "/api/auth/logout"):
             self.send_error(404)
             return
         if not self.can_write():
@@ -467,7 +483,10 @@ class Handler(BaseHTTPRequestHandler):
         except (ValueError, RecursionError):
             self.send_error(400)
             return
-        self.api(self.path, payload)
+        if self.path.startswith("/api/auth/"):
+            self.auth(self.path.rsplit("/", 1)[1], payload)
+        else:
+            self.api(self.path, payload)
 
     def can_write(self):
         if self.headers.get("Sec-Fetch-Site") == "cross-site":
@@ -480,22 +499,67 @@ class Handler(BaseHTTPRequestHandler):
         except argparse.ArgumentTypeError:
             return False
 
-    def session_token(self):
+    def cookie(self, name):
         cookies = SimpleCookie()
         try:
             cookies.load(self.headers.get("Cookie", ""))
         except CookieError:
             return ""
-        cookie = cookies.get("reacao")
+        cookie = cookies.get(name)
         return cookie.value if cookie else ""
 
+    def account(self):
+        return self.server.game.accounts.resolve(self.cookie("reacao_session"), time.time())
+
+    def json(self, status, payload, cookie=None):
+        self.respond(status, json.dumps(payload).encode("utf-8"), "application/json", cookie)
+
+    def auth(self, action, payload):
+        accounts = self.server.game.accounts
+        now = time.time()
+        current = self.cookie("reacao_session")
+        if action == "logout":
+            accounts.logout(current, now)
+            self.json(200, {}, "")
+            return
+        if not self.server.allow_auth(self.client_address[0]):
+            self.json(429, {"error": "Muitas tentativas. Aguarde um minuto e tente novamente."})
+            return
+        if not self.server.auth_workers.acquire(blocking=False):
+            self.json(503, {"error": "Há muitas solicitações em andamento. Tente novamente."})
+            return
+        try:
+            if action == "register":
+                token, error = accounts.register(payload, self.cookie("reacao"), now)
+                if error:
+                    self.json(400, {"error": error})
+                    return
+            else:
+                token = accounts.login(payload, now)
+                if token is None:
+                    self.json(401, {"error": "E-mail ou senha incorretos."})
+                    return
+        finally:
+            self.server.auth_workers.release()
+        if current:
+            accounts.logout(current, now)
+        self.json(200, {}, token)
+
     def api(self, route, payload):
-        current = self.session_token()
-        token, state, error = self.server.game.request(current, route, payload)
+        account = self.account()
+        if account is None:
+            if route == "/api/state":
+                available = self.server.game.accounts.can_claim(self.cookie("reacao"))
+                self.json(200, {"authenticated": False, "legacyAvailable": available})
+            else:
+                self.json(401, {"error": "Entre na sua conta para continuar."})
+            return
+
+        _, state, error = self.server.game.request(account["player"], route, payload)
+        state.update(authenticated=True, account={key: account[key] for key in ("id", "email", "created")})
         if error:
             state["error"] = error
-        self.respond(409 if error else 200, json.dumps(state).encode("utf-8"), "application/json",
-                     token if token != current else None)
+        self.json(409 if error else 200, state)
 
     def log_request(self, code="-", size="-"):
         if self.path != "/api/state" or code != 200:
