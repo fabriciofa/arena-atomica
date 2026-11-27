@@ -9,6 +9,7 @@
 <script src="game.js" defer></script>
 <script src="training.js" defer></script>
 <script src="practice.js" defer></script>
+<script src="study.js" defer></script>
 </head>
 <body>
 <header class="top">
@@ -58,7 +59,10 @@
         <button type="submit" id="ready" class="primary" disabled>Ficar pronto <span aria-hidden="true">↗</span></button>
         <button type="button" id="cancel" class="secondary" hidden>Cancelar prontidão</button>
         <p class="panel-note" id="queue-note" role="status">A partida começa quando dois jogadores estão prontos.</p>
-        <button type="button" id="training-open" class="link-button">Treinar sozinho</button>
+        <div class="study-actions">
+          <button type="button" id="training-open" class="link-button">Treinar sozinho</button>
+          <button type="button" id="study-open" class="link-button">Laboratório de estudos</button>
+        </div>
         <details class="match-settings" id="settings">
           <summary>Configurações da partida</summary>
           <dl id="settings-list"></dl>
@@ -113,6 +117,19 @@
       <button type="button" id="profile-history" class="link-button">Ver histórico</button>
     </div>
     <button type="button" id="profile-retry" class="link-button" hidden>Tentar novamente</button>
+  </section>
+  <section class="panel profile" id="study-view" hidden aria-labelledby="study-title">
+    <h2 id="study-title">Laboratório de estudos</h2>
+    <div class="training-filters"><label>Assunto <select id="study-topic"></select></label></div>
+    <article class="study-lesson" aria-live="polite">
+      <h3>Conceito</h3><p id="study-concept"></p>
+      <h3>Exemplo</h3><p id="study-example"></p>
+      <h3>Para lembrar</h3><p id="study-takeaway"></p>
+    </article>
+    <div class="training-footer">
+      <button id="study-practice" class="primary" type="button">Praticar este assunto</button>
+      <button id="study-back" class="link-button" type="button">Voltar ao lobby</button>
+    </div>
   </section>
   <section class="panel profile" id="training-view" hidden aria-labelledby="training-title">
     <h2 id="training-title">Treino solo</h2>

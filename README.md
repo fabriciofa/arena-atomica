@@ -26,9 +26,11 @@ Abra `http://localhost:8000` em dois perfis de navegador ou em uma janela normal
 4. Vence quem derrubar o oponente ou terminar a décima rodada com mais vida. Vidas iguais dão empate. A pontuação serve para acompanhar o desempenho no quiz.
 5. Consulte as explicações em **O que você aprendeu?**. O histórico permite abrir os detalhes dos seus duelos recentes e sugere os temas com mais erros nas alternativas marcadas. **Jogar novamente** volta à fila geral. Em **Perfil**, consulte o total de duelos, pontos e a precisão nas respostas marcadas.
 
-## Treino solo
+## Laboratório e treino solo
 
-No lobby, abra **Treinar sozinho**. Escolha entre Ácidos e bases, Reações orgânicas e Carboidratos, depois selecione a dificuldade. Cada combinação oferece duas questões autorais, com explicação após a resposta e revisão dos erros. O treino funciona no navegador com um banco separado e sua pontuação fica na sessão de treino.
+Abra **Laboratório de estudos** no lobby ou clique em um tema recomendado no histórico. O laboratório cobre os cinco temas do Simulado P2 com conceitos e exemplos. **Praticar este assunto** abre o treino com o tema já selecionado. Também é possível entrar pelo botão **Treinar sozinho**.
+
+O banco solo tem 24 questões autorais, organizadas por assunto e dificuldade. Cada resposta traz uma explicação, e os erros podem ser revistos ao final. O treino roda no navegador e sua pontuação fica na sessão de treino.
 
 ## Arquitetura e dados
 

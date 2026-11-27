@@ -1,6 +1,6 @@
 'use strict';
 
-(() => {
+const practice = (() => {
   let questions = [];
   let missed = [];
   let round = 0;
@@ -92,13 +92,16 @@
     setup();
     $('training-topic').focus();
   });
-  $('training-open').addEventListener('click',()=>{
+  function open(topic) {
+    if(Object.hasOwn(trainingBank,topic)) $('training-topic').value=topic;
     setup();
     setView('training');
     $('training-topic').focus();
-  });
+  }
+  $('training-open').addEventListener('click',()=>open());
   $('training-back').addEventListener('click',()=>{
     setView('arena');
     $('training-open').focus();
   });
+  return {open};
 })();

@@ -278,3 +278,9 @@ body:not([data-screen=result]) .result-effect{display:none}
 #training-feedback[data-verdict=correct]{color:#b9ffcc}
 #training-feedback[data-verdict=incorrect]{color:#ffc9d5}
 .training-footer{display:flex;flex-wrap:wrap;gap:8px;margin-top:15px}
+
+.study-actions{display:flex;flex-wrap:wrap;gap:7px}
+.study-actions .link-button:disabled{opacity:.55}
+.study-lesson h3{margin:12px 0 3px;font-size:16px;color:var(--lime)}
+.study-lesson p{margin:0 0 12px;color:var(--muted);line-height:1.55}
+#study-practice{width:auto}

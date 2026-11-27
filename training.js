@@ -43,4 +43,26 @@ const trainingBank = {
       ['Qual ligação cria pontos de ramificação no glicogênio?', 'α(1→6)', ['α(1→4)', 'β(1→4)', 'β(1→2)'], 'As cadeias principais usam ligações α(1→4). Uma ligação α(1→6) conecta uma cadeia lateral.'],
     ],
   ],
+  'Bioquímica e proteínas': [
+    [
+      ['Quais unidades formam a sequência de uma proteína?', 'Aminoácidos', ['Nucleotídeos', 'Monossacarídeos', 'Ácidos graxos'], 'Cada cadeia de proteína é formada por aminoácidos conectados por ligações peptídicas.'],
+    ],
+    [
+      ['Ao separar as subunidades de uma proteína sem alterar o dobramento de cada cadeia, qual nível estrutural muda diretamente?', 'Quaternário', ['Primário', 'Secundário', 'Terciário'], 'O nível quaternário descreve a associação entre cadeias polipeptídicas.'],
+    ],
+    [
+      ['Por que um segmento rico em cadeias laterais hidrofóbicas pode ser estável no interior de uma membrana?', 'Interage favoravelmente com as caudas apolares dos lipídios', ['Porque todas as cadeias laterais ficam ionizadas', 'Porque a membrana converte aminoácidos em açúcares', 'Porque o núcleo da membrana é rico em água'], 'O interior da membrana é apolar. Cadeias laterais hidrofóbicas podem permanecer em contato com as caudas dos lipídios.'],
+    ],
+  ],
+  'Ácidos nucleicos': [
+    [
+      ['Qual destas bases se emparelha com adenina no DNA?', 'Timina', ['Guanina', 'Citosina', 'Uracila'], 'No DNA, os pares canônicos são A–T e C–G.'],
+    ],
+    [
+      ['Qual tipo de ligação conecta os nucleotídeos ao longo de uma fita de DNA?', 'Fosfodiéster', ['Peptídica', 'Ponte dissulfeto', 'Ligação de hidrogênio'], 'A ligação fosfodiéster conecta açúcares vizinhos por um grupo fosfato na cadeia.'],
+    ],
+    [
+      ['Em DNA de fita dupla com pareamento canônico, 28% das bases são citosina. Qual é a porcentagem de adenina?', '22%', ['14%', '28%', '44%'], 'A guanina também corresponde a 28%. O restante é 44%, dividido igualmente entre adenina e timina.'],
+    ],
+  ],
 };

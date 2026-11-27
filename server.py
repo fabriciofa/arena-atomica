@@ -28,7 +28,8 @@ SPECIAL_DAMAGE = 40
 RNG = secrets.SystemRandom()
 STATIC = {"/": ("index.html", "text/html"), "/style.css": ("style.css", "text/css"),
           "/game.js": ("game.js", "text/javascript"), "/arena.js": ("arena.js", "text/javascript"),
-          "/training.js": ("training.js", "text/javascript"), "/practice.js": ("practice.js", "text/javascript")}
+          "/training.js": ("training.js", "text/javascript"), "/practice.js": ("practice.js", "text/javascript"),
+          "/study.js": ("study.js", "text/javascript")}
 
 
 def question_for(level, used):

@@ -68,6 +68,7 @@ function setView(next) {
   $('history-view').hidden=next!=='history';
   $('profile-view').hidden=next!=='profile';
   $('training-view').hidden=next!=='training';
+  $('study-view').hidden=next!=='study';
   $('menu-tab').setAttribute('aria-pressed',String(next==='arena'));
   $('history-tab').setAttribute('aria-pressed',String(next==='history'));
   $('profile-tab').setAttribute('aria-pressed',String(next==='profile'));
@@ -190,9 +191,14 @@ function renderHistory() {
   const content=$('history-list');
   content.replaceChildren(list);
   if(topics.length) {
-    const suggested=make('p',topics.map(({topic,misses})=>
-      topic+' ('+misses+(misses===1 ? ' erro)' : ' erros)')).join(' · '),'panel-note');
-    content.append(make('h3','Sugestões de revisão'),make('p','Temas com mais erros nos seus últimos duelos.'),suggested);
+    const suggestions=make('div',undefined,'study-actions');
+    suggestions.append(...topics.map(({topic,misses})=>{
+      const button=make('button',topic+' · '+misses+(misses===1 ? ' erro' : ' erros'),'link-button');
+      button.type='button';
+      button.addEventListener('click',()=>study.open(topic));
+      return button;
+    }));
+    content.append(make('h3','Sugestões de revisão'),make('p','Temas com mais erros nos seus últimos duelos.'),suggestions);
   }
 }
 
@@ -449,8 +455,8 @@ function render() {
   const screen=finished ? 'result' : playing ? 'battle' : 'lobby';
   document.body.dataset.screen=view==='arena' ? screen : view;
   $('menu-tab').textContent=finished ? 'Resultado' : playing ? 'Arena' : 'Lobby';
-  $('eyebrow').textContent=view==='training' ? 'LABORATÓRIO' : view==='profile' ? 'PERFIL' : view==='history' ? 'HISTÓRICO' : finished ? 'DUELO ENCERRADO' : 'DUELO ONLINE / 1 × 1';
-  $('subtitle').textContent=view==='training' ? 'Pratique por assunto e revise no seu ritmo.' : view==='profile' ? 'Seu desempenho nos duelos concluídos.' : view==='history' ? 'Acompanhe seus duelos encerrados.' : finished ?
+  $('eyebrow').textContent=view==='study' || view==='training' ? 'LABORATÓRIO' : view==='profile' ? 'PERFIL' : view==='history' ? 'HISTÓRICO' : finished ? 'DUELO ENCERRADO' : 'DUELO ONLINE / 1 × 1';
+  $('subtitle').textContent=view==='study' ? 'Revise conceitos com exemplos e exercícios.' : view==='training' ? 'Pratique por assunto e revise no seu ritmo.' : view==='profile' ? 'Seu desempenho nos duelos concluídos.' : view==='history' ? 'Acompanhe seus duelos encerrados.' : finished ?
     'Confira seu desempenho e revise as questões.' : playing ?
       'Cada acerto vale um ponto. A vida decide o duelo.' : 'Escolha seu químico, fique pronto e desafie outro jogador.';
   $('lobby').hidden=playing;
@@ -483,6 +489,7 @@ function render() {
   $('cancel').hidden=!queued;
   $('cancel').disabled=pending || !connected;
   $('training-open').disabled=queued || pending;
+  $('study-open').disabled=queued || pending;
   $('queue-note').textContent=preparing ? 'Os dois jogadores estão prontos.' : queued ?
     'Buscando outro jogador pronto…' : 'A partida começa quando dois jogadores estão prontos.';
   renderRoom(preparing ? match : null);
