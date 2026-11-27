@@ -1,0 +1,16 @@
+services:
+  game:
+    build: .
+    ports:
+      - "${REACAO_PORT:-8000}:8000"
+    volumes:
+      - reacao-data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "from urllib.request import urlopen; urlopen('http://127.0.0.1:8000/', timeout=2).close()"]
+      interval: 10s
+      timeout: 3s
+      start_period: 5s
+      retries: 3
+
+volumes:
+  reacao-data:

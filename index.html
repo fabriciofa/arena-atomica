@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reação! — Duelos de química</title>
+<link rel="stylesheet" href="style.css">
+<script src="arena.js" defer></script>
+<script src="game.js" defer></script>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="/" aria-label="Reação, início"><span class="logo" aria-hidden="true">⚗</span>REAÇÃO<span class="accent">!</span></a>
+    <nav aria-label="Menu principal"><button id="menu-tab" aria-pressed="true">Arena</button><button id="history-tab" aria-pressed="false">Histórico</button></nav>
+    <span class="online" id="online" role="status">Conectando…</span>
+  </div>
+</header>
+<main>
+  <div class="intro">
+    <div class="eyebrow" id="eyebrow">DUELO ONLINE / 1 × 1</div>
+    <h1 id="title">Arena <em>Atômica</em></h1>
+    <p id="subtitle">Escolha seu químico, entre na fila e enfrente outro jogador.</p>
+  </div>
+  <div class="layout" id="arena-view">
+    <section class="game" aria-label="Arena de batalha">
+      <div class="hud"><span class="stage-name"><span aria-hidden="true">◈</span> <span id="arena-name">LABORATÓRIO DE CRISTAIS</span></span><span id="round-label">PRÉVIA DA ARENA</span></div>
+      <div class="stage">
+        <canvas id="arena" role="img" aria-label="Dois químicos se enfrentam em um laboratório 3D"></canvas>
+        <div id="fighters" class="fighters" hidden></div>
+        <div class="arena-result" id="arena-result" hidden></div>
+      </div>
+      <div class="stage-footer"><span id="stage-detail">CRISTALOGRAFIA</span><span id="stage-rules">Simulado P2 · 90 questões</span></div>
+    </section>
+    <aside class="panel">
+      <form id="lobby">
+        <div class="panel-label"><span class="icon" aria-hidden="true">⚛</span> ENTRADA DO LABORATÓRIO</div>
+        <h2>Prepare o duelo</h2>
+        <label class="field-label" for="player-name">Seu nome</label>
+        <input id="player-name" minlength="2" maxlength="24" required autocomplete="nickname" placeholder="Nome de jogador">
+        <fieldset>
+          <legend>Escolha seu químico</legend>
+          <div id="roster" class="roster"></div>
+        </fieldset>
+        <button type="submit" id="ready" class="primary" disabled>Ficar pronto <span aria-hidden="true">↗</span></button>
+        <button type="button" id="cancel" class="secondary" hidden>Sair da fila</button>
+        <p class="panel-note" id="queue-note" role="status">A partida começa quando dois jogadores estão prontos.</p>
+      </form>
+      <section id="duel" hidden>
+        <div class="panel-label"><span class="icon" aria-hidden="true">⚛</span><span id="level">FÁCIL</span><span id="clock" class="clock"></span></div>
+        <h2 id="quiz-heading">Desafio químico</h2>
+        <p id="question"></p>
+        <div id="answers" class="answers"></div>
+        <p id="feedback" class="panel-note" role="status"></p>
+        <button type="button" id="leave" class="secondary">Desistir do duelo</button>
+        <section id="battle-summary" class="battle-summary" hidden aria-label="Resumo da batalha">
+          <div class="battle-points"><strong id="battle-points"></strong><span id="battle-total"></span></div>
+          <details id="answer-key" class="answer-key" hidden>
+            <summary>Ver gabarito</summary>
+            <ol id="review-list"></ol>
+          </details>
+        </section>
+        <button type="button" id="back" class="primary" hidden>Voltar ao menu <span aria-hidden="true">↗</span></button>
+      </section>
+      <p id="error" class="error" role="alert" hidden></p>
+    </aside>
+  </div>
+  <section class="panel history" id="history-view" hidden aria-labelledby="history-title">
+    <h2 id="history-title">Últimos duelos</h2>
+    <div id="history-list"></div>
+  </section>
+  <details class="rules" id="rules">
+    <summary>Como funciona o duelo</summary>
+    <p>Os dois recebem a mesma pergunta. Após a primeira resposta, o outro jogador tem 15 segundos para responder. Se só um acertar, ele arremessa um balão de fundo redondo e tira 25 pontos de vida do oponente. A cada três acertos, o especial lança um balão roxo gigante que tira até 40 pontos. Um acerto que zera a vida aciona a finalização do personagem. Se ambos acertarem, os dois esquivam, inclusive do especial. Se ambos errarem ou deixarem o tempo acabar, ninguém causa dano. Nas rodadas com acerto, a dificuldade avança de Fácil para Média e depois para Difícil, conforme os níveis do Simulado P2. O duelo acaba por nocaute ou após 10 rodadas, quando vence quem tiver mais vida.</p>
+  </details>
+</main>
+</body>
+</html>
