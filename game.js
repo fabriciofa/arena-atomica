@@ -67,6 +67,7 @@ function setView(next) {
   $('arena-view').hidden=next!=='arena';
   $('history-view').hidden=next!=='history';
   $('profile-view').hidden=next!=='profile';
+  $('training-view').hidden=next!=='training';
   $('menu-tab').setAttribute('aria-pressed',String(next==='arena'));
   $('history-tab').setAttribute('aria-pressed',String(next==='history'));
   $('profile-tab').setAttribute('aria-pressed',String(next==='profile'));
@@ -448,8 +449,8 @@ function render() {
   const screen=finished ? 'result' : playing ? 'battle' : 'lobby';
   document.body.dataset.screen=view==='arena' ? screen : view;
   $('menu-tab').textContent=finished ? 'Resultado' : playing ? 'Arena' : 'Lobby';
-  $('eyebrow').textContent=view==='profile' ? 'PERFIL' : view==='history' ? 'HISTÓRICO' : finished ? 'DUELO ENCERRADO' : 'DUELO ONLINE / 1 × 1';
-  $('subtitle').textContent=view==='profile' ? 'Seu desempenho nos duelos concluídos.' : view==='history' ? 'Acompanhe seus duelos encerrados.' : finished ?
+  $('eyebrow').textContent=view==='training' ? 'LABORATÓRIO' : view==='profile' ? 'PERFIL' : view==='history' ? 'HISTÓRICO' : finished ? 'DUELO ENCERRADO' : 'DUELO ONLINE / 1 × 1';
+  $('subtitle').textContent=view==='training' ? 'Pratique por assunto e revise no seu ritmo.' : view==='profile' ? 'Seu desempenho nos duelos concluídos.' : view==='history' ? 'Acompanhe seus duelos encerrados.' : finished ?
     'Confira seu desempenho e revise as questões.' : playing ?
       'Cada acerto vale um ponto. A vida decide o duelo.' : 'Escolha seu químico, fique pronto e desafie outro jogador.';
   $('lobby').hidden=playing;
@@ -481,6 +482,7 @@ function render() {
   $('ready').disabled=!connected || pending;
   $('cancel').hidden=!queued;
   $('cancel').disabled=pending || !connected;
+  $('training-open').disabled=queued || pending;
   $('queue-note').textContent=preparing ? 'Os dois jogadores estão prontos.' : queued ?
     'Buscando outro jogador pronto…' : 'A partida começa quando dois jogadores estão prontos.';
   renderRoom(preparing ? match : null);

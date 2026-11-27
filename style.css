@@ -266,3 +266,15 @@ body:not([data-screen=result]) .result-effect{display:none}
 .profile-stats div{background:var(--ink);border:1px solid var(--line);border-radius:9px;padding:9px 11px}
 .profile-stats dt{color:var(--muted);font-size:12px}
 .profile-stats dd{margin:2px 0 0;color:var(--lime);font:850 20px var(--mono)}
+
+#training-open{margin-top:3px}
+.training-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(180px,100%),1fr));gap:12px;margin-bottom:14px}
+.training-filters label{display:grid;gap:5px;color:var(--muted);font-size:13px;font-weight:750}
+.training-filters select{width:100%;min-height:44px;background:#0f1727;color:var(--white);border:1px solid #465471;border-radius:8px;padding:7px 9px;font:inherit}
+.training-filters select:focus-visible{outline:2px solid var(--lime);outline-offset:3px}
+#training-progress{min-height:0}
+#training-question{margin-top:8px}
+#training-feedback{margin:9px 0 13px;min-height:0}
+#training-feedback[data-verdict=correct]{color:#b9ffcc}
+#training-feedback[data-verdict=incorrect]{color:#ffc9d5}
+.training-footer{display:flex;flex-wrap:wrap;gap:8px;margin-top:15px}

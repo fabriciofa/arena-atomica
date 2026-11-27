@@ -7,6 +7,8 @@
 <link rel="stylesheet" href="style.css">
 <script src="arena.js" defer></script>
 <script src="game.js" defer></script>
+<script src="training.js" defer></script>
+<script src="practice.js" defer></script>
 </head>
 <body>
 <header class="top">
@@ -56,6 +58,7 @@
         <button type="submit" id="ready" class="primary" disabled>Ficar pronto <span aria-hidden="true">↗</span></button>
         <button type="button" id="cancel" class="secondary" hidden>Cancelar prontidão</button>
         <p class="panel-note" id="queue-note" role="status">A partida começa quando dois jogadores estão prontos.</p>
+        <button type="button" id="training-open" class="link-button">Treinar sozinho</button>
         <details class="match-settings" id="settings">
           <summary>Configurações da partida</summary>
           <dl id="settings-list"></dl>
@@ -110,6 +113,34 @@
       <button type="button" id="profile-history" class="link-button">Ver histórico</button>
     </div>
     <button type="button" id="profile-retry" class="link-button" hidden>Tentar novamente</button>
+  </section>
+  <section class="panel profile" id="training-view" hidden aria-labelledby="training-title">
+    <h2 id="training-title">Treino solo</h2>
+    <form id="training-form">
+      <div class="training-filters">
+        <label>Assunto <select id="training-topic"></select></label>
+        <label>Dificuldade <select id="training-difficulty"></select></label>
+      </div>
+      <button class="primary" type="submit">Começar treino</button>
+    </form>
+    <section id="training-round" hidden aria-labelledby="training-question">
+      <p id="training-progress" class="panel-note"></p>
+      <h3 id="training-question" tabindex="-1"></h3>
+      <div id="training-answers" class="answers"></div>
+      <p id="training-feedback" class="panel-note" role="status"></p>
+      <button id="training-next" class="primary" type="button" hidden></button>
+    </section>
+    <section id="training-result" hidden aria-labelledby="training-score">
+      <h3 id="training-score" tabindex="-1"></h3>
+      <details id="training-review" class="answer-key" hidden>
+        <summary>Revisar erros</summary>
+        <ol id="training-mistakes"></ol>
+      </details>
+    </section>
+    <div class="training-footer">
+      <button id="training-reset" class="link-button" type="button" hidden>Escolher outro treino</button>
+      <button id="training-back" class="link-button" type="button">Voltar ao lobby</button>
+    </div>
   </section>
   <dialog id="history-detail" aria-labelledby="history-detail-title">
     <form method="dialog">

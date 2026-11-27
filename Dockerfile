@@ -5,7 +5,7 @@ ENV PYTHONUNBUFFERED=1 \
     REACAO_DB=/data/reacao.sqlite3
 
 WORKDIR /app
-COPY server.py questions.json index.html style.css game.js arena.js ./
+COPY server.py questions.json index.html style.css game.js arena.js training.js practice.js ./
 RUN mkdir /data && chown 10001:10001 /data
 
 USER 10001:10001
