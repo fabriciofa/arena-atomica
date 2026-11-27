@@ -264,6 +264,31 @@ class Game:
                 "winner": match["winner"], "reason": match["reason"], "summary": self.summary(match, side),
                 "duration": max(0, round(match["ended"] - started)) if started is not None else None}
 
+    def player_profile(self, token):
+        with closing(self.connect()) as db:
+            profile = db.execute("SELECT name, chemist FROM players WHERE token=?", (token,)).fetchone()
+            if profile is None:
+                return None
+            wins = losses = draws = hits = errors = unanswered = 0
+            for row in db.execute("""SELECT second, data FROM matches WHERE ended IS NOT NULL
+                                      AND (first=? OR second=?)""", (token, token)):
+                match = json.loads(row["data"])
+                side = int(row["second"] == token)
+                winner = match["winner"]
+                wins += int(winner == side)
+                losses += int(winner is not None and winner != side)
+                draws += int(winner is None)
+                for entry in match["log"]:
+                    if entry["correct"][side]:
+                        hits += 1
+                    elif entry["choices"][side] is None:
+                        unanswered += 1
+                    else:
+                        errors += 1
+        return {"name": profile["name"], "chemist": profile["chemist"], "wins": wins,
+                "losses": losses, "draws": draws, "points": hits, "errors": errors,
+                "unanswered": unanswered, "accuracy": round(100 * hits / (hits + errors)) if hits + errors else None}
+
     def history_result(self, token, match_id):
         with closing(self.connect()) as db:
             row = db.execute("""SELECT * FROM matches WHERE id=? AND ended IS NOT NULL
@@ -374,6 +399,12 @@ class Handler(BaseHTTPRequestHandler):
         route = self.path.split("?")[0]
         if route == "/api/state":
             self.api(route, {})
+        elif route == "/api/profile":
+            profile = self.server.game.player_profile(self.session_token())
+            if profile is None:
+                self.send_error(404)
+            else:
+                self.respond(200, json.dumps(profile).encode("utf-8"), "application/json")
         elif route.startswith("/api/history/"):
             token = self.session_token()
             result = self.server.game.history_result(token, route.removeprefix("/api/history/"))

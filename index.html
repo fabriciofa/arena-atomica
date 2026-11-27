@@ -12,7 +12,7 @@
 <header class="top">
   <div class="top-inner">
     <a class="brand" href="/" aria-label="Reação, início"><span class="logo" aria-hidden="true">⚗</span>REAÇÃO<span class="accent">!</span></a>
-    <nav aria-label="Menu principal"><button id="menu-tab" aria-pressed="true">Lobby</button><button id="history-tab" aria-pressed="false">Histórico</button></nav>
+    <nav aria-label="Menu principal"><button id="menu-tab" aria-pressed="true">Lobby</button><button id="history-tab" aria-pressed="false">Histórico</button><button id="profile-tab" aria-pressed="false" disabled>Perfil</button></nav>
     <button type="button" id="how" class="link-button" disabled>Como jogar</button>
     <span class="online" id="online" role="status">Conectando…</span>
   </div>
@@ -97,6 +97,19 @@
   <section class="panel history" id="history-view" hidden aria-labelledby="history-title">
     <h2 id="history-title">Últimos duelos</h2>
     <div id="history-list"></div>
+  </section>
+  <section class="panel profile" id="profile-view" hidden aria-labelledby="profile-title">
+    <h2 id="profile-title">Meu perfil</h2>
+    <p id="profile-status" class="panel-note" role="status"></p>
+    <div id="profile-content" hidden>
+      <div class="profile-identity">
+        <span class="element" id="profile-element" aria-hidden="true"></span>
+        <div><strong id="profile-name"></strong><small id="profile-chemist"></small></div>
+      </div>
+      <dl id="profile-stats" class="profile-stats"></dl>
+      <button type="button" id="profile-history" class="link-button">Ver histórico</button>
+    </div>
+    <button type="button" id="profile-retry" class="link-button" hidden>Tentar novamente</button>
   </section>
   <dialog id="history-detail" aria-labelledby="history-detail-title">
     <form method="dialog">

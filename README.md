@@ -24,7 +24,7 @@ Abra `http://localhost:8000` em dois perfis de navegador ou em uma janela normal
 2. Responda clicando em uma alternativa ou com as teclas **1 a 4**. Há 35 segundos para a primeira resposta. Depois dela, o outro jogador recebe 15 segundos.
 3. Cada acerto vale um ponto. Se só um acertar, o outro perde vida. A cada três acertos, o jogador carrega um especial. Os dois acertando, ambos esquivam.
 4. Vence quem derrubar o oponente ou terminar a décima rodada com mais vida. Vidas iguais dão empate. A pontuação serve para acompanhar o desempenho no quiz.
-5. Consulte as explicações em **O que você aprendeu?**. O histórico permite abrir os detalhes dos seus duelos recentes e sugere os temas com mais erros nas alternativas marcadas. **Jogar novamente** volta à fila geral.
+5. Consulte as explicações em **O que você aprendeu?**. O histórico permite abrir os detalhes dos seus duelos recentes e sugere os temas com mais erros nas alternativas marcadas. **Jogar novamente** volta à fila geral. Em **Perfil**, consulte o total de duelos, pontos e a precisão nas respostas marcadas.
 
 ## Arquitetura e dados
 

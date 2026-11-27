@@ -116,6 +116,24 @@ class DuelTest(unittest.TestCase):
         self.assertEqual(result["summary"]["points"], 1)
         self.assertEqual(result["summary"]["review"][0]["correct"]["letter"], "ABCD"[correct])
 
+    def test_profile_counts_only_completed_duels_for_the_current_player(self):
+        match = self.start()
+        correct = self.correct(match)
+        self.answer(self.first, match, correct)
+        self.answer(self.second, match, (correct + 1) % 4)
+        self.assertEqual(self.game.player_profile(self.first)["points"], 0)
+        self.assertIsNone(self.game.player_profile(""))
+        self.request(self.second, "leave", id=match["id"])
+        first = self.game.player_profile(self.first)
+        second = self.game.player_profile(self.second)
+        self.assertEqual((first["name"], first["chemist"]), ("Marie", "curie"))
+        self.assertEqual((first["wins"], first["losses"], first["draws"], first["points"], first["accuracy"]),
+                         (1, 0, 0, 1, 100))
+        self.assertEqual((second["wins"], second["losses"], second["points"], second["errors"], second["accuracy"]),
+                         (0, 1, 0, 1, 0))
+        self.game = server.Game(self.path)
+        self.assertEqual(self.game.player_profile(self.first), first)
+
     def test_historical_review_uses_original_order_without_saved_permutation(self):
         correct = server.question("1:0")[2]
         match = {"log": [{"question": "1:0", "correct": [True, False], "choices": [correct, None]}]}

@@ -255,3 +255,14 @@ body:not([data-screen=result]) .result-effect{display:none}
 #history-detail h3{margin:15px 0 0}
 #history-detail .panel-note{min-height:0}
 .history-score{padding-left:20px;color:var(--muted);font-size:13px}
+
+.profile{max-width:820px}
+.profile-identity{display:flex;align-items:center;gap:12px}
+.profile-identity .element{width:42px;height:42px;font-size:15px}
+.profile-identity strong,.profile-identity small{display:block;overflow-wrap:anywhere}
+.profile-identity strong{font-size:20px}
+.profile-identity small{color:var(--muted);font-size:12px}
+.profile-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(138px,100%),1fr));gap:10px;margin:16px 0}
+.profile-stats div{background:var(--ink);border:1px solid var(--line);border-radius:9px;padding:9px 11px}
+.profile-stats dt{color:var(--muted);font-size:12px}
+.profile-stats dd{margin:2px 0 0;color:var(--lime);font:850 20px var(--mono)}

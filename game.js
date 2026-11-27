@@ -66,12 +66,60 @@ function setView(next) {
   view=next;
   $('arena-view').hidden=next!=='arena';
   $('history-view').hidden=next!=='history';
+  $('profile-view').hidden=next!=='profile';
   $('menu-tab').setAttribute('aria-pressed',String(next==='arena'));
   $('history-tab').setAttribute('aria-pressed',String(next==='history'));
+  $('profile-tab').setAttribute('aria-pressed',String(next==='profile'));
   render();
 }
 $('menu-tab').addEventListener('click',()=>setView('arena'));
 $('history-tab').addEventListener('click',()=>setView('history'));
+$('profile-history').addEventListener('click',()=>setView('history'));
+$('profile-tab').addEventListener('click',()=>{
+  if(view==='profile') return;
+  setView('profile');
+  loadProfile();
+});
+$('profile-retry').addEventListener('click',loadProfile);
+
+let profileLoad;
+async function loadProfile() {
+  const requestId=Symbol();
+  profileLoad=requestId;
+  $('profile-status').textContent='Carregando seu perfil…';
+  $('profile-status').hidden=false;
+  $('profile-content').hidden=true;
+  $('profile-retry').hidden=true;
+  try {
+    const response=await fetch('/api/profile',{signal:AbortSignal.timeout(5000)});
+    if(!response.ok) throw new Error('Perfil indisponível');
+    const data=await response.json();
+    if(profileLoad!==requestId) return;
+    const chemist=chemists[data.chemist];
+    $('profile-name').textContent=data.name;
+    $('profile-chemist').textContent='Último químico escolhido · '+chemist.name;
+    $('profile-element').textContent=chemist.symbol;
+    $('profile-element').style.setProperty('--chip',chemist.color);
+    const matches=data.wins+data.losses+data.draws;
+    const metrics=[
+      ['Duelos',matches],['Vitórias',data.wins],['Derrotas',data.losses],['Empates',data.draws],
+      ['Pontos',data.points],['Erros',data.errors],['Em branco',data.unanswered],
+      ['Precisão nas respostas marcadas',data.accuracy===null ? '—' : data.accuracy+'%'],
+    ];
+    $('profile-stats').replaceChildren(...metrics.map(([label,value])=>{
+      const metric=make('div');
+      metric.append(make('dt',label),make('dd',String(value)));
+      return metric;
+    }));
+    $('profile-status').textContent=matches ? '' : 'Seu desempenho aparece aqui após o primeiro duelo.';
+    $('profile-status').hidden=matches>0;
+    $('profile-content').hidden=false;
+  } catch {
+    if(profileLoad!==requestId) return;
+    $('profile-status').textContent='Não foi possível carregar o perfil.';
+    $('profile-retry').hidden=false;
+  }
+}
 $('how').addEventListener('click',()=>$('instructions').showModal());
 $('player-name').addEventListener('input',render);
 
@@ -398,10 +446,10 @@ function render() {
   const playing=Boolean(match && !preparing);
   const finished=match?.phase==='finished';
   const screen=finished ? 'result' : playing ? 'battle' : 'lobby';
-  document.body.dataset.screen=view==='history' ? 'history' : screen;
+  document.body.dataset.screen=view==='arena' ? screen : view;
   $('menu-tab').textContent=finished ? 'Resultado' : playing ? 'Arena' : 'Lobby';
-  $('eyebrow').textContent=view==='history' ? 'HISTÓRICO' : finished ? 'DUELO ENCERRADO' : 'DUELO ONLINE / 1 × 1';
-  $('subtitle').textContent=view==='history' ? 'Acompanhe seus duelos encerrados.' : finished ?
+  $('eyebrow').textContent=view==='profile' ? 'PERFIL' : view==='history' ? 'HISTÓRICO' : finished ? 'DUELO ENCERRADO' : 'DUELO ONLINE / 1 × 1';
+  $('subtitle').textContent=view==='profile' ? 'Seu desempenho nos duelos concluídos.' : view==='history' ? 'Acompanhe seus duelos encerrados.' : finished ?
     'Confira seu desempenho e revise as questões.' : playing ?
       'Cada acerto vale um ponto. A vida decide o duelo.' : 'Escolha seu químico, fique pronto e desafie outro jogador.';
   $('lobby').hidden=playing;
@@ -474,6 +522,7 @@ async function request(action,payload) {
     state=next;
     serverClock={now:state.now,at:performance.now()};
     connected=true;
+    $('profile-tab').disabled=false;
     if(action!=='state' || $('error').dataset.connection==='true') {
       sayError(state.error);
       $('error').dataset.connection='false';
