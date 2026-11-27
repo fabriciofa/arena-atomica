@@ -1,6 +1,8 @@
 services:
   game:
     build: .
+    environment:
+      REACAO_PUBLIC_ORIGIN: "${REACAO_PUBLIC_ORIGIN:-}"
     ports:
       - "${REACAO_PORT:-8000}:8000"
     volumes:

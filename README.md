@@ -39,6 +39,16 @@ O banco solo tem 24 questões autorais, organizadas por assunto e dificuldade. C
 - O SQLite guarda `players` e `matches`. Uma partida referencia dois jogadores e persiste seu estado e as rodadas em JSON. A ordem das alternativas é comum aos dois jogadores da rodada e fica registrada para reabrir o gabarito. Duelos anteriores ao embaralhamento usam a ordem original.
 - `questions.json` contém as 90 questões derivadas do `Simulado_P2_90_questoes.pdf`, com dificuldade, tema, alternativa correta e explicação. A fonte informa a origem do banco. A revisão científica independente ainda está pendente.
 
+## Publicação com HTTPS
+
+O servidor Python fala HTTP. Para disponibilizá-lo em HTTPS, use um proxy reverso que termine TLS e configure a origem pública exata, incluindo a porta se ela não for padrão.
+
+```sh
+REACAO_PUBLIC_ORIGIN=https://arena.exemplo.com docker compose up --build -d
+```
+
+Sem Docker, use a mesma variável ou `--public-origin https://arena.exemplo.com`. Com origem HTTPS configurada, o servidor emite cookies `Secure` e rejeita requisições de escrita de outra origem quando o navegador informa a origem. Restrinja o acesso direto à porta do aplicativo no ambiente de publicação. O acesso local por HTTP continua disponível sem essa configuração.
+
 ## Testes
 
 ```sh
@@ -48,8 +58,8 @@ node --check arena.js
 docker compose config --quiet
 ```
 
-A suíte cobre contagem regressiva, cancelamento, respostas simultâneas, duplicidade, timeout, privacidade da resposta antes da revelação, reconexão, revisão de duelos antigos e persistência do resultado. Use duas sessões no navegador para conferir foco, mensagens, efeitos, navegação e responsividade.
+A suíte cobre contagem regressiva, cancelamento, respostas simultâneas, duplicidade, timeout, privacidade da resposta antes da revelação, reconexão, revisão de duelos antigos e persistência do resultado. Os testes por HTTP também verificam os cookies, a validação do corpo das requisições e o acesso ao histórico. Use duas sessões no navegador para conferir foco, mensagens, efeitos, navegação e responsividade.
 
 ## Limitações
 
-A identidade atual é vinculada ao cookie do navegador. Contas recuperáveis, ranking e recompensas são módulos futuros. Exposição pública exige HTTPS e avaliação de limites de requisição, retenção de dados e capacidade sob carga.
+A identidade atual é vinculada ao cookie do navegador. Contas recuperáveis, ranking e recompensas são módulos futuros. Exposição pública ainda exige um proxy HTTPS e avaliação de limites de requisição, retenção de dados e capacidade sob carga.

@@ -6,9 +6,10 @@ import os
 import secrets
 import sqlite3
 import time
-from http.cookies import SimpleCookie
+from http.cookies import CookieError, SimpleCookie
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parent
 QUESTIONS = json.loads((ROOT / "questions.json").read_text(encoding="utf-8"))
@@ -369,8 +370,27 @@ class Game:
             db.close()
 
 
+def public_origin(value):
+    try:
+        origin = urlsplit(value)
+        if (origin.scheme in ("http", "https") and origin.hostname and origin.username is None
+                and origin.port != 0 and origin.path in ("", "/") and not origin.query and not origin.fragment
+                and not any(char.isspace() for char in value)):
+            port = origin.port
+            host = origin.hostname
+            if ":" in host:
+                host = f"[{host}]"
+            if port is not None and port != (443 if origin.scheme == "https" else 80):
+                host += f":{port}"
+            return f"{origin.scheme}://{host}"
+    except ValueError:
+        pass
+    raise argparse.ArgumentTypeError("Informe uma origem HTTP(S), por exemplo https://arena.exemplo.com.")
+
+
 class Server(ThreadingHTTPServer):
     next_tick = 0
+    origin = ""
 
     def service_actions(self):
         if time.monotonic() < self.next_tick:
@@ -383,6 +403,8 @@ class Server(ThreadingHTTPServer):
 
 
 class Handler(BaseHTTPRequestHandler):
+    timeout = 10
+
     def respond(self, code, data, content_type, cookie=None):
         self.send_response(code)
         self.send_header("Content-Type", content_type + "; charset=utf-8")
@@ -393,7 +415,9 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Security-Policy",
                          "default-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'")
         if cookie:
-            self.send_header("Set-Cookie", f"reacao={cookie}; Path=/; HttpOnly; SameSite=Lax; Max-Age=31536000")
+            secure = "; Secure" if self.server.origin.startswith("https://") else ""
+            self.send_header("Set-Cookie",
+                             f"reacao={cookie}; Path=/; HttpOnly; SameSite=Lax; Max-Age=31536000{secure}")
         self.end_headers()
         self.wfile.write(data)
 
@@ -424,21 +448,44 @@ class Handler(BaseHTTPRequestHandler):
         if self.path not in ("/api/ready", "/api/cancel", "/api/answer", "/api/leave"):
             self.send_error(404)
             return
+        if not self.can_write():
+            self.send_error(403)
+            return
         try:
             length = int(self.headers.get("Content-Length", "0"))
             if self.headers.get_content_type() != "application/json" or not 0 < length <= 4096:
                 raise ValueError
-            payload = json.loads(self.rfile.read(length))
+            body = self.rfile.read(length)
+            if len(body) != length:
+                raise ValueError
+            payload = json.loads(body)
             if not isinstance(payload, dict):
                 raise ValueError
-        except (ValueError, UnicodeError):
+        except TimeoutError:
+            self.send_error(408)
+            return
+        except (ValueError, RecursionError):
             self.send_error(400)
             return
         self.api(self.path, payload)
 
+    def can_write(self):
+        if self.headers.get("Sec-Fetch-Site") == "cross-site":
+            return False
+        origin = self.headers.get("Origin")
+        if origin is None:
+            return True
+        try:
+            return public_origin(origin) == (self.server.origin or public_origin("http://" + self.headers.get("Host", "")))
+        except argparse.ArgumentTypeError:
+            return False
+
     def session_token(self):
         cookies = SimpleCookie()
-        cookies.load(self.headers.get("Cookie", ""))
+        try:
+            cookies.load(self.headers.get("Cookie", ""))
+        except CookieError:
+            return ""
         cookie = cookies.get("reacao")
         return cookie.value if cookie else ""
 
@@ -460,9 +507,11 @@ if __name__ == "__main__":
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--host", default="0.0.0.0")
     parser.add_argument("--db", default=os.environ.get("REACAO_DB", str(ROOT / "reacao.sqlite3")))
+    parser.add_argument("--public-origin", type=public_origin, default=os.environ.get("REACAO_PUBLIC_ORIGIN") or None)
     args = parser.parse_args()
     server = Server((args.host, args.port), Handler)
     server.game = Game(args.db)
+    server.origin = args.public_origin or ""
     print(f"Reação! na porta {server.server_port}", flush=True)
     try:
         server.serve_forever()
