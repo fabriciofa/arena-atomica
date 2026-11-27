@@ -12,7 +12,8 @@
 <header class="top">
   <div class="top-inner">
     <a class="brand" href="/" aria-label="Reação, início"><span class="logo" aria-hidden="true">⚗</span>REAÇÃO<span class="accent">!</span></a>
-    <nav aria-label="Menu principal"><button id="menu-tab" aria-pressed="true">Arena</button><button id="history-tab" aria-pressed="false">Histórico</button></nav>
+    <nav aria-label="Menu principal"><button id="menu-tab" aria-pressed="true">Lobby</button><button id="history-tab" aria-pressed="false">Histórico</button></nav>
+    <button type="button" id="how" class="link-button" disabled>Como jogar</button>
     <span class="online" id="online" role="status">Conectando…</span>
   </div>
 </header>
@@ -23,15 +24,25 @@
     <p id="subtitle">Escolha seu químico, entre na fila e enfrente outro jogador.</p>
   </div>
   <div class="layout" id="arena-view">
+    <div class="arena-column">
     <section class="game" aria-label="Arena de batalha">
       <div class="hud"><span class="stage-name"><span aria-hidden="true">◈</span> <span id="arena-name">LABORATÓRIO DE CRISTAIS</span></span><span id="round-label">PRÉVIA DA ARENA</span></div>
       <div class="stage">
         <canvas id="arena" role="img" aria-label="Dois químicos se enfrentam em um laboratório 3D"></canvas>
-        <div id="fighters" class="fighters" hidden></div>
+        <div id="preview-caption" class="preview-caption"></div>
+        <div id="countdown" class="countdown" hidden>
+          <span>Duelo prestes a começar</span><strong id="countdown-number">3</strong>
+        </div>
         <div class="arena-result" id="arena-result" hidden></div>
       </div>
+      <div id="fighters" class="fighters" hidden></div>
       <div class="stage-footer"><span id="stage-detail">CRISTALOGRAFIA</span><span id="stage-rules">Simulado P2 · 90 questões</span></div>
     </section>
+    <section id="room" class="room" aria-labelledby="room-title">
+      <h2 id="room-title">Sala de espera</h2>
+      <div id="room-players" class="room-players"></div>
+    </section>
+    </div>
     <aside class="panel">
       <form id="lobby">
         <div class="panel-label"><span class="icon" aria-hidden="true">⚛</span> ENTRADA DO LABORATÓRIO</div>
@@ -43,24 +54,41 @@
           <div id="roster" class="roster"></div>
         </fieldset>
         <button type="submit" id="ready" class="primary" disabled>Ficar pronto <span aria-hidden="true">↗</span></button>
-        <button type="button" id="cancel" class="secondary" hidden>Sair da fila</button>
+        <button type="button" id="cancel" class="secondary" hidden>Cancelar prontidão</button>
         <p class="panel-note" id="queue-note" role="status">A partida começa quando dois jogadores estão prontos.</p>
+        <details class="match-settings" id="settings">
+          <summary>Configurações da partida</summary>
+          <dl id="settings-list"></dl>
+        </details>
       </form>
       <section id="duel" hidden>
         <div class="panel-label"><span class="icon" aria-hidden="true">⚛</span><span id="level">FÁCIL</span><span id="clock" class="clock"></span></div>
         <h2 id="quiz-heading">Desafio químico</h2>
+        <progress id="round-progress" class="round-progress" aria-label="Progresso das rodadas"></progress>
+        <p id="connection-note" class="connection-note" role="status" hidden></p>
         <p id="question"></p>
         <div id="answers" class="answers"></div>
         <p id="feedback" class="panel-note" role="status"></p>
         <button type="button" id="leave" class="secondary">Desistir do duelo</button>
         <section id="battle-summary" class="battle-summary" hidden aria-label="Resumo da batalha">
+          <p id="result-meta" class="panel-note"></p>
+          <div id="result-players" class="result-players"></div>
           <div class="battle-points"><strong id="battle-points"></strong><span id="battle-total"></span></div>
+          <dl id="result-stats" class="result-stats"></dl>
+          <section id="learning" class="learning">
+            <h3>O que você aprendeu?</h3>
+            <p id="topics" class="panel-note"></p>
+            <details id="missed-review"><summary>Revisar erros e questões em branco</summary><ol id="missed-list"></ol></details>
+          </section>
           <details id="answer-key" class="answer-key" hidden>
-            <summary>Ver gabarito</summary>
+            <summary>Ver detalhes da partida e gabarito</summary>
             <ol id="review-list"></ol>
           </details>
         </section>
-        <button type="button" id="back" class="primary" hidden>Voltar ao menu <span aria-hidden="true">↗</span></button>
+        <div id="result-actions" class="result-actions" hidden>
+          <button type="button" id="replay" class="primary">Jogar novamente <span aria-hidden="true">↗</span></button>
+          <button type="button" id="back" class="secondary">Voltar ao lobby</button>
+        </div>
       </section>
       <p id="error" class="error" role="alert" hidden></p>
     </aside>
@@ -69,10 +97,13 @@
     <h2 id="history-title">Últimos duelos</h2>
     <div id="history-list"></div>
   </section>
-  <details class="rules" id="rules">
-    <summary>Como funciona o duelo</summary>
-    <p>Os dois recebem a mesma pergunta. Após a primeira resposta, o outro jogador tem 15 segundos para responder. Se só um acertar, ele arremessa um balão de fundo redondo e tira 25 pontos de vida do oponente. A cada três acertos, o especial lança um balão roxo gigante que tira até 40 pontos. Um acerto que zera a vida aciona a finalização do personagem. Se ambos acertarem, os dois esquivam, inclusive do especial. Se ambos errarem ou deixarem o tempo acabar, ninguém causa dano. Nas rodadas com acerto, a dificuldade avança de Fácil para Média e depois para Difícil, conforme os níveis do Simulado P2. O duelo acaba por nocaute ou após 10 rodadas, quando vence quem tiver mais vida.</p>
-  </details>
+  <dialog id="instructions" aria-labelledby="instructions-title">
+    <form method="dialog">
+      <div class="dialog-heading"><h2 id="instructions-title">Como jogar</h2><button value="close" class="link-button" aria-label="Fechar instruções">Fechar</button></div>
+      <ol id="instructions-list"></ol>
+    </form>
+  </dialog>
 </main>
+<div id="result-effect" class="result-effect" aria-hidden="true"></div>
 </body>
 </html>

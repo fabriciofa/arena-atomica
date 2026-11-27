@@ -13,11 +13,14 @@ ROOT = Path(__file__).resolve().parent
 QUESTIONS = json.loads((ROOT / "questions.json").read_text(encoding="utf-8"))
 CHEMISTS = ("curie", "mendeleev", "lavoisier", "franklin")
 ARENAS = ("cristais", "eletrolise", "estufa")
+COUNTDOWN_SECONDS = 3
 ROUND_SECONDS = 35
 RESPONSE_SECONDS = 15
 REVEAL_SECONDS = 7
+BOTH_ANSWERED_REVEAL_SECONDS = 3
 MAX_ROUNDS = 10
 PRESENCE_SECONDS = 40
+CONNECTION_GRACE = 5
 SPECIAL_THRESHOLD = 3
 HIT_DAMAGE = 25
 SPECIAL_DAMAGE = 40
@@ -67,6 +70,12 @@ class Game:
 
     def advance(self, match, presence, now):
         stale = [now - last > PRESENCE_SECONDS for last in presence]
+        if match["phase"] == "countdown":
+            if now >= match["deadline"]:
+                start = match["deadline"]
+                match.update(phase="question", started=start, deadline=start + ROUND_SECONDS,
+                             used=[question_for(1, [])])
+            return
         if any(stale) and match["phase"] == "question":
             winner = None if all(stale) else stale.index(False)
             self.finish(match, winner, "disconnect", now)
@@ -93,13 +102,12 @@ class Game:
 
     @staticmethod
     def charge(match):
-        totals = [sum(entry["correct"][side] for entry in match["log"]) for side in range(2)]
-        return [total % SPECIAL_THRESHOLD for total in totals]
+        return [total % SPECIAL_THRESHOLD for total in Game.scores(match)]
 
     @staticmethod
     def resolve(match, now):
         qid = match["used"][-1]
-        _, _, correct, _ = question(qid)
+        _, _, correct, *_ = question(qid)
         hits = [answer == correct for answer in match["answers"]]
         specials = [hit and charge == SPECIAL_THRESHOLD - 1
                     for hit, charge in zip(hits, Game.charge(match))]
@@ -117,7 +125,8 @@ class Game:
         match["result"] = {"correct": hits, "damaged": damaged, "choices": match["answers"],
                            "specials": specials, "damage": damage, "finisher": finisher}
         match["log"].append({"question": qid, **match["result"]})
-        match.update(phase="reveal", deadline=now + REVEAL_SECONDS)
+        reveal_seconds = (BOTH_ANSWERED_REVEAL_SECONDS if None not in match["answers"] else REVEAL_SECONDS)
+        match.update(phase="reveal", deadline=now + reveal_seconds)
 
     def pair(self, db, now):
         rows = db.execute("SELECT token,name,chemist FROM players WHERE ready IS NOT NULL AND seen>=?",
@@ -127,8 +136,8 @@ class Game:
             tokens = (first["token"], second["token"])
             match = dict(id=secrets.token_hex(12), players=[
                 dict(name=p["name"], chemist=p["chemist"]) for p in (first, second)
-            ], arena=RNG.choice(ARENAS), hp=[100, 100], round=1, level=1, phase="question",
-                deadline=now + ROUND_SECONDS, used=[question_for(1, [])], answers=[None, None],
+            ], arena=RNG.choice(ARENAS), hp=[100, 100], round=1, level=1, phase="countdown",
+                deadline=now + COUNTDOWN_SECONDS, used=[], answers=[None, None],
                 result=None, log=[])
             db.execute("INSERT INTO matches VALUES (?,?,?,?,NULL)",
                        (match["id"], *tokens, json.dumps(match)))
@@ -138,31 +147,57 @@ class Game:
         return db.execute("SELECT * FROM matches WHERE ended IS NULL AND (first=? OR second=?)",
                           (token, token)).fetchone()
 
+    @staticmethod
+    def cancel_countdown(db, match_id, tokens, now):
+        db.execute("DELETE FROM matches WHERE id=?", (match_id,))
+        for token in tokens:
+            db.execute("UPDATE players SET ready=? WHERE token=? AND seen>=?",
+                       (now, token, now - PRESENCE_SECONDS))
+
     def tick(self, db, now):
         db.execute("UPDATE players SET ready=NULL WHERE ready IS NOT NULL AND seen<?", (now - PRESENCE_SECONDS,))
         rows = db.execute("""
-            SELECT m.data, a.seen AS seen_a, b.seen AS seen_b FROM matches m
+            SELECT m.data, m.first, m.second, a.seen AS seen_a, b.seen AS seen_b FROM matches m
             JOIN players a ON a.token=m.first JOIN players b ON b.token=m.second WHERE m.ended IS NULL
         """).fetchall()
         for row in rows:
             match = json.loads(row["data"])
             before = (match["phase"], match["round"])
-            self.advance(match, (row["seen_a"], row["seen_b"]), now)
+            presence = (row["seen_a"], row["seen_b"])
+            if match["phase"] == "countdown" and any(now - seen > PRESENCE_SECONDS for seen in presence):
+                self.cancel_countdown(db, match["id"], (row["first"], row["second"]), now)
+                continue
+            self.advance(match, presence, now)
             if before != (match["phase"], match["round"]):
                 self.save(db, match)
 
     @staticmethod
+    def scores(match):
+        return [sum(entry["correct"][side] for entry in match["log"]) for side in range(2)]
+
+    @staticmethod
     def summary(match, side):
         review = []
+        hits = errors = unanswered = streak = best = 0
         for entry in match["log"]:
-            prompt, options, correct, _ = question(entry["question"])
+            prompt, options, correct, _, topic, explanation = question(entry["question"])
             choice = entry["choices"][side]
+            if entry["correct"][side]:
+                hits += 1
+                streak += 1
+                best = max(best, streak)
+            else:
+                streak = 0
+                unanswered += int(choice is None)
+                errors += int(choice is not None)
             review.append({
-                "prompt": prompt,
+                "prompt": prompt, "topic": topic, "explanation": explanation,
                 "correct": {"letter": "ABCD"[correct], "text": options[correct]},
                 "answer": None if choice is None else {"letter": "ABCD"[choice], "text": options[choice]},
             })
-        return {"points": sum(entry["correct"][side] for entry in match["log"]), "review": review}
+        return {"points": hits, "hits": hits, "errors": errors, "unanswered": unanswered,
+                "accuracy": round(100 * hits / (hits + errors)) if hits + errors else None,
+                "bestStreak": best, "review": review}
 
     def snapshot(self, db, token, now):
         profile = db.execute("SELECT name, chemist, ready FROM players WHERE token=?", (token,)).fetchone()
@@ -180,20 +215,29 @@ class Game:
                             "rounds": len(old["log"])})
         state = {"profile": {"name": profile["name"], "chemist": profile["chemist"]},
                  "ready": profile["ready"] is not None, "now": now, "history": history, "match": None,
+                 "rules": {"rounds": MAX_ROUNDS, "roundSeconds": ROUND_SECONDS, "responseSeconds": RESPONSE_SECONDS,
+                           "specialThreshold": SPECIAL_THRESHOLD, "hitDamage": HIT_DAMAGE, "specialDamage": SPECIAL_DAMAGE},
                  "online": db.execute("SELECT COUNT(*) FROM players WHERE seen>=?", (now - PRESENCE_SECONDS,)).fetchone()[0]}
         if row:
             match = json.loads(row["data"])
             side = int(row["second"] == token)
             public = {key: match[key] for key in ("id", "players", "arena", "hp", "round", "level", "phase", "deadline", "result")}
+            public["scores"] = self.scores(match)
+            if match["phase"] != "finished":
+                seen = {item["token"]: item["seen"] for item in
+                        db.execute("SELECT token,seen FROM players WHERE token IN (?,?)", (row["first"], row["second"]))}
+                public["connections"] = [now - seen[token] <= CONNECTION_GRACE for token in (row["first"], row["second"])]
             public["charge"] = self.charge(match)
             public["specialThreshold"] = SPECIAL_THRESHOLD
             public["side"] = side
             public["answered"] = [choice is not None for choice in match["answers"]]
             public["choice"] = match["answers"][side]
             if match["phase"] == "finished":
-                public.update(winner=match["winner"], reason=match["reason"], summary=self.summary(match, side))
-            else:
-                prompt, options, correct, number = question(match["used"][-1])
+                started = match.get("started")
+                public.update(winner=match["winner"], reason=match["reason"], summary=self.summary(match, side),
+                              duration=max(0, round(match["ended"] - started)) if started is not None else None)
+            elif match["phase"] != "countdown":
+                prompt, options, correct, number, *_ = question(match["used"][-1])
                 public.update(prompt=prompt, options=options, number=number)
                 if match["phase"] == "reveal":
                     public.update(correct=correct)
@@ -227,6 +271,11 @@ class Game:
                         db.execute("UPDATE players SET name=?, chemist=?, ready=? WHERE token=?",
                                    (name.strip(), chemist, now, token))
             elif action == "/api/cancel":
+                if row and json.loads(row["data"])["phase"] == "countdown":
+                    opponent = row["first"] if row["second"] == token else row["second"]
+                    self.cancel_countdown(db, row["id"], (opponent,), now)
+                elif row:
+                    error = "O duelo já começou."
                 db.execute("UPDATE players SET ready=NULL WHERE token=?", (token,))
             elif action in ("/api/answer", "/api/leave"):
                 if not row or payload.get("id") != row["id"]:

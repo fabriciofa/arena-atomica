@@ -9,7 +9,9 @@
         "Substâncias formadas apenas por elementos inorgânicos."
       ],
       1,
-      1
+      1,
+      "Bioquímica e proteínas",
+      "A massa molecular cresce quando muitas unidades menores formam uma molécula grande."
     ],
     [
       "Qual é a estrutura básica de um aminoácido?",
@@ -20,7 +22,9 @@
         "Uma cadeia de glicose ligada a um grupo amino."
       ],
       0,
-      2
+      2,
+      "Bioquímica e proteínas",
+      "O carbono alfa liga o grupo amino, a carboxila, um hidrogênio e a cadeia lateral."
     ],
     [
       "Os aminoácidos são considerados anfóteros porque:",
@@ -31,7 +35,9 @@
         "Não apresentam grupos ionizáveis."
       ],
       2,
-      3
+      3,
+      "Bioquímica e proteínas",
+      "O grupo amino pode aceitar prótons, enquanto a carboxila pode doá-los."
     ],
     [
       "Quantos aminoácidos padrão são normalmente utilizados na formação das proteínas?",
@@ -42,7 +48,9 @@
         "30."
       ],
       2,
-      4
+      4,
+      "Bioquímica e proteínas",
+      "As proteínas usam normalmente 20 aminoácidos padrão, cujas cadeias laterais têm propriedades diferentes."
     ],
     [
       "O que são peptídeos?",
@@ -53,7 +61,9 @@
         "Lipídios responsáveis pelo armazenamento energético."
       ],
       0,
-      5
+      5,
+      "Bioquímica e proteínas",
+      "Cada peptídeo reúne resíduos de aminoácidos por ligações covalentes."
     ],
     [
       "Qual ligação é responsável pela união entre aminoácidos?",
@@ -64,7 +74,9 @@
         "Ligação iônica."
       ],
       1,
-      6
+      6,
+      "Bioquímica e proteínas",
+      "O grupo carboxila de um aminoácido liga-se ao grupo amino de outro."
     ],
     [
       "Qual é a principal característica da estrutura primária de uma proteína?",
@@ -75,7 +87,9 @@
         "As interações entre diferentes proteínas."
       ],
       1,
-      7
+      7,
+      "Bioquímica e proteínas",
+      "A estrutura primária indica a ordem dos resíduos, da extremidade amino à carboxila."
     ],
     [
       "Qual alternativa apresenta uma função biológica das proteínas?",
@@ -86,7 +100,9 @@
         "Produzir diretamente carboidratos."
       ],
       1,
-      8
+      8,
+      "Bioquímica e proteínas",
+      "Muitas enzimas são proteínas que aceleram reações sem serem consumidas."
     ],
     [
       "O que caracteriza essencialmente uma enzima?",
@@ -97,7 +113,9 @@
         "Ser uma base nitrogenada."
       ],
       1,
-      9
+      9,
+      "Bioquímica e proteínas",
+      "A enzima favorece um caminho com menor energia de ativação."
     ],
     [
       "Quais são as duas principais classes de ácidos nucleicos?",
@@ -108,7 +126,9 @@
         "Proteínas e lipídios."
       ],
       0,
-      10
+      10,
+      "Ácidos nucleicos",
+      "DNA e RNA são polímeros de nucleotídeos com açúcares distintos."
     ],
     [
       "Qual é a principal função do DNA?",
@@ -119,7 +139,9 @@
         "Transportar oxigênio."
       ],
       1,
-      11
+      11,
+      "Ácidos nucleicos",
+      "A ordem das bases guarda instruções que podem ser copiadas e expressas."
     ],
     [
       "Qual base nitrogenada está presente no RNA no lugar da timina?",
@@ -130,7 +152,9 @@
         "Citosina."
       ],
       2,
-      12
+      12,
+      "Ácidos nucleicos",
+      "RNA geralmente usa uracila no pareamento com adenina."
     ],
     [
       "As bases nitrogenadas dos ácidos nucleicos são classificadas em:",
@@ -141,7 +165,9 @@
         "Aminoácidos e peptídeos."
       ],
       1,
-      13
+      13,
+      "Ácidos nucleicos",
+      "Purinas têm dois anéis. Pirimidinas têm um."
     ],
     [
       "Qual alternativa apresenta somente bases púricas?",
@@ -152,7 +178,9 @@
         "Guanina e uracila."
       ],
       0,
-      14
+      14,
+      "Ácidos nucleicos",
+      "Adenina e guanina têm a estrutura de dois anéis típica das purinas."
     ],
     [
       "Um nucleotídeo é constituído por:",
@@ -163,7 +191,9 @@
         "Apenas açúcar e base nitrogenada."
       ],
       1,
-      15
+      15,
+      "Ácidos nucleicos",
+      "Base e açúcar formam um nucleosídeo. A adição de fosfato forma um nucleotídeo."
     ],
     [
       "Os carboidratos são compostos orgânicos constituídos principalmente por:",
@@ -174,7 +204,9 @@
         "Nitrogênio, fósforo e hidrogênio."
       ],
       0,
-      16
+      16,
+      "Carboidratos",
+      "Os carboidratos mais comuns contêm carbono, hidrogênio e oxigênio."
     ],
     [
       "Qual é uma das principais funções dos carboidratos?",
@@ -185,7 +217,9 @@
         "Transporte de oxigênio no sangue."
       ],
       0,
-      17
+      17,
+      "Carboidratos",
+      "A glicose fornece energia e pode ser estocada em polímeros como o glicogênio."
     ],
     [
       "A glicose é classificada como:",
@@ -196,7 +230,9 @@
         "Lipídio."
       ],
       2,
-      18
+      18,
+      "Carboidratos",
+      "A glicose tem uma única unidade de açúcar."
     ],
     [
       "Qual alternativa apresenta um dissacarídeo?",
@@ -207,7 +243,9 @@
         "Galactose."
       ],
       2,
-      19
+      19,
+      "Carboidratos",
+      "A sacarose reúne duas unidades, glicose e frutose."
     ],
     [
       "O amido é um exemplo de:",
@@ -218,7 +256,9 @@
         "Aminoácido."
       ],
       2,
-      20
+      20,
+      "Carboidratos",
+      "O amido é um polímero de glicose que serve de reserva nas plantas."
     ],
     [
       "Segundo Arrhenius, um ácido é uma substância que, em solução aquosa:",
@@ -229,7 +269,9 @@
         "Libera exclusivamente oxigênio."
       ],
       0,
-      21
+      21,
+      "Ácidos e bases",
+      "Em água, os prótons se associam a moléculas de água, formando H₃O⁺."
     ],
     [
       "Segundo Brønsted-Lowry, uma base é uma espécie química que:",
@@ -240,7 +282,9 @@
         "Recebe nêutrons."
       ],
       1,
-      22
+      22,
+      "Ácidos e bases",
+      "Uma base de Brønsted–Lowry aceita H⁺ e se torna seu ácido conjugado."
     ],
     [
       "Segundo Lewis, um ácido é uma espécie que:",
@@ -251,7 +295,9 @@
         "Doa prótons obrigatoriamente."
       ],
       1,
-      23
+      23,
+      "Ácidos e bases",
+      "Um ácido de Lewis aceita um par eletrônico de uma base de Lewis."
     ],
     [
       "Por que os aminoácidos podem formar zwitterions?",
@@ -262,7 +308,9 @@
         "Porque não interagem com a água."
       ],
       0,
-      24
+      24,
+      "Bioquímica e proteínas",
+      "O grupo amino pode estar protonado e a carboxila desprotonada na mesma molécula."
     ],
     [
       "Na quebra homolítica de uma ligação química:",
@@ -273,7 +321,9 @@
         "Não ocorre formação de espécies reativas."
       ],
       1,
-      25
+      25,
+      "Reações orgânicas",
+      "A divisão igualmente compartilhada dos elétrons pode produzir radicais."
     ],
     [
       "O que é um carbocátion?",
@@ -284,7 +334,9 @@
         "Um composto formado exclusivamente por carbono e oxigênio."
       ],
       0,
-      26
+      26,
+      "Reações orgânicas",
+      "Um carbocátion tem um centro de carbono deficiente em elétrons."
     ],
     [
       "Um nucleófilo é uma espécie química que:",
@@ -295,7 +347,9 @@
         "Apresenta sempre carga positiva."
       ],
       1,
-      27
+      27,
+      "Reações orgânicas",
+      "O nucleófilo usa um par eletrônico para formar ligação com um eletrófilo."
     ],
     [
       "Qual alternativa representa uma reação de eliminação?",
@@ -306,7 +360,9 @@
         "Formação de um sal por neutralização."
       ],
       1,
-      28
+      28,
+      "Reações orgânicas",
+      "Em muitas eliminações, a saída de grupos vizinhos cria uma ligação dupla."
     ],
     [
       "A hidrólise de uma ligação peptídica provoca:",
@@ -317,7 +373,9 @@
         "A transformação de proteínas em lipídios."
       ],
       1,
-      29
+      29,
+      "Bioquímica e proteínas",
+      "Na hidrólise, a água participa da quebra da ligação amida entre os resíduos."
     ],
     [
       "A esterificação é uma reação geralmente realizada entre:",
@@ -328,7 +386,9 @@
         "Um alcano e uma base nitrogenada."
       ],
       0,
-      30
+      30,
+      "Reações orgânicas",
+      "Um ácido carboxílico e um álcool podem formar um éster e água."
     ]
   ],
   [
@@ -341,7 +401,9 @@
         "São encontrados exclusivamente em vegetais."
       ],
       1,
-      31
+      31,
+      "Bioquímica e proteínas",
+      "A dieta fornece aminoácidos que o organismo não sintetiza em quantidade suficiente."
     ],
     [
       "O carbono alfa dos aminoácidos, com exceção da glicina, apresenta uma característica importante. Qual é ela?",
@@ -352,7 +414,9 @@
         "Não apresenta ligação com hidrogênio."
       ],
       1,
-      32
+      32,
+      "Bioquímica e proteínas",
+      "Quatro grupos distintos em torno de um carbono tetraédrico permitem quiralidade."
     ],
     [
       "A glicina é considerada um aminoácido especial porque:",
@@ -363,7 +427,9 @@
         "Apresenta dois grupos amino."
       ],
       1,
-      33
+      33,
+      "Bioquímica e proteínas",
+      "Na glicina, a cadeia lateral e outro substituinte do carbono alfa são ambos hidrogênios."
     ],
     [
       "A ligação peptídica apresenta caráter parcial de dupla ligação devido:",
@@ -374,7 +440,9 @@
         "À ausência de elétrons compartilhados."
       ],
       0,
-      34
+      34,
+      "Bioquímica e proteínas",
+      "A deslocalização eletrônica limita a rotação da ligação entre carbono e nitrogênio."
     ],
     [
       "A estrutura secundária das proteínas é estabilizada principalmente por:",
@@ -385,7 +453,9 @@
         "Ligações metálicas."
       ],
       0,
-      35
+      35,
+      "Bioquímica e proteínas",
+      "Ligações de hidrogênio entre C=O e N–H da cadeia principal estabilizam essas estruturas."
     ],
     [
       "Qual alternativa apresenta exemplos de estruturas secundárias das proteínas?",
@@ -396,7 +466,9 @@
         "Purinas e pirimidinas."
       ],
       0,
-      36
+      36,
+      "Bioquímica e proteínas",
+      "Hélices alfa e folhas beta surgem de padrões repetidos de ligações de hidrogênio."
     ],
     [
       "A estrutura terciária de uma proteína é estabilizada por diferentes interações. Entre elas estão:",
@@ -407,7 +479,9 @@
         "Exclusivamente ligações covalentes entre carbonos."
       ],
       0,
-      37
+      37,
+      "Bioquímica e proteínas",
+      "O dobramento reúne cadeias laterais em um arranjo estabilizado por várias interações."
     ],
     [
       "Na hipótese chave-cadeado, a interação entre enzima e substrato ocorre porque:",
@@ -418,7 +492,9 @@
         "A enzima atua independentemente da estrutura do substrato."
       ],
       1,
-      38
+      38,
+      "Bioquímica e proteínas",
+      "No modelo chave-cadeado, o sítio ativo já apresenta forma complementar ao substrato."
     ],
     [
       "O sítio ativo de uma enzima é:",
@@ -429,7 +505,9 @@
         "A região que impede qualquer interação química."
       ],
       1,
-      39
+      39,
+      "Bioquímica e proteínas",
+      "O sítio ativo reúne os grupos que reconhecem o substrato e promovem a reação."
     ],
     [
       "Qual dos fatores abaixo pode alterar a atividade enzimática?",
@@ -440,7 +518,9 @@
         "Todas as alternativas anteriores."
       ],
       3,
-      40
+      40,
+      "Bioquímica e proteínas",
+      "Temperatura, pH e quantidade de substrato afetam a velocidade de formas diferentes."
     ],
     [
       "A principal diferença estrutural entre nucleosídeos e nucleotídeos é:",
@@ -451,7 +531,9 @@
         "O nucleosídeo é formado apenas por uma base nitrogenada."
       ],
       1,
-      41
+      41,
+      "Ácidos nucleicos",
+      "O fosfato distingue o nucleotídeo do nucleosídeo, que tem apenas base e açúcar."
     ],
     [
       "A ligação que conecta os nucleotídeos na cadeia dos ácidos nucleicos é denominada:",
@@ -462,7 +544,9 @@
         "Dissulfeto."
       ],
       2,
-      42
+      42,
+      "Ácidos nucleicos",
+      "O fosfato conecta os açúcares de nucleotídeos vizinhos na espinha dorsal."
     ],
     [
       "No DNA, a adenina se emparelha com a timina por meio de:",
@@ -473,7 +557,9 @@
         "Quatro ligações de hidrogênio."
       ],
       1,
-      43
+      43,
+      "Ácidos nucleicos",
+      "No pareamento canônico do DNA, A e T formam duas ligações de hidrogênio."
     ],
     [
       "No DNA, a guanina se emparelha com a citosina por meio de:",
@@ -484,7 +570,9 @@
         "Quatro ligações de hidrogênio."
       ],
       2,
-      44
+      44,
+      "Ácidos nucleicos",
+      "No pareamento canônico do DNA, G e C formam três ligações de hidrogênio."
     ],
     [
       "A estrutura helicoidal do DNA é estabilizada principalmente por:",
@@ -495,7 +583,9 @@
         "Exclusivamente ligações iônicas entre os grupos fosfato."
       ],
       1,
-      45
+      45,
+      "Ácidos nucleicos",
+      "O pareamento dá especificidade e o empilhamento das bases também estabiliza a hélice."
     ],
     [
       "Qual alternativa apresenta corretamente três monossacarídeos?",
@@ -506,7 +596,9 @@
         "Maltose, glicose e amido."
       ],
       0,
-      46
+      46,
+      "Carboidratos",
+      "Cada uma é um açúcar simples. Glicose e galactose são aldoses, e frutose é uma cetose."
     ],
     [
       "A ligação responsável pela união entre monossacarídeos para formar carboidratos maiores é denominada:",
@@ -517,7 +609,9 @@
         "Dissulfeto."
       ],
       2,
-      47
+      47,
+      "Carboidratos",
+      "A ligação glicosídica usa o carbono anomérico de uma unidade de açúcar."
     ],
     [
       "A diferença entre homopolissacarídeos e heteropolissacarídeos está relacionada:",
@@ -528,7 +622,9 @@
         "À quantidade de grupos fosfato."
       ],
       1,
-      48
+      48,
+      "Carboidratos",
+      "O prefixo homo indica uma unidade de açúcar repetida. Hetero indica mais de um tipo."
     ],
     [
       "Qual alternativa apresenta um exemplo de homopolissacarídeo?",
@@ -539,7 +635,9 @@
         "Proteína."
       ],
       0,
-      49
+      49,
+      "Carboidratos",
+      "Amilose e amilopectina são as frações do amido, ambas constituídas de glicose."
     ],
     [
       "A síntese de carboidratos em organismos fotossintetizantes está diretamente relacionada:",
@@ -550,7 +648,9 @@
         "À desnaturação de enzimas."
       ],
       0,
-      50
+      50,
+      "Carboidratos",
+      "A energia luminosa sustenta a fixação de carbono em compostos que originam açúcares."
     ],
     [
       "A principal limitação da teoria de Arrhenius é que ela:",
@@ -561,7 +661,9 @@
         "Explica somente compostos orgânicos."
       ],
       0,
-      51
+      51,
+      "Ácidos e bases",
+      "Arrhenius descreve ácidos e bases por seu efeito sobre íons em água."
     ],
     [
       "A presença de um grupo retirador de elétrons próximo a uma carboxila tende a:",
@@ -572,7 +674,9 @@
         "Transformar o ácido em uma base forte."
       ],
       1,
-      52
+      52,
+      "Ácidos e bases",
+      "Ao estabilizar a carga do carboxilato, o substituinte facilita a perda do próton."
     ],
     [
       "O efeito indutivo ocorre devido:",
@@ -583,7 +687,9 @@
         "À formação obrigatória de radicais livres."
       ],
       1,
-      53
+      53,
+      "Ácidos e bases",
+      "Diferenças de eletronegatividade redistribuem densidade eletrônica nas ligações sigma."
     ],
     [
       "Quando um grupo retirador de elétrons está mais próximo de um grupo carboxila, seu efeito sobre a acidez geralmente é:",
@@ -594,7 +700,9 @@
         "Independente da distância."
       ],
       0,
-      54
+      54,
+      "Ácidos e bases",
+      "O efeito indutivo enfraquece com a distância ao longo da cadeia de ligações."
     ],
     [
       "A cadeia lateral da lisina apresenta comportamento básico principalmente devido à presença de:",
@@ -605,7 +713,9 @@
         "Grupo sulfidrila."
       ],
       1,
-      55
+      55,
+      "Bioquímica e proteínas",
+      "O grupo amino terminal da cadeia lateral da lisina pode aceitar um próton."
     ],
     [
       "Na quebra heterolítica de uma ligação covalente:",
@@ -616,7 +726,9 @@
         "São formados obrigatoriamente dois radicais livres."
       ],
       1,
-      56
+      56,
+      "Reações orgânicas",
+      "Na heterólise, um dos átomos retém o par eletrônico da ligação."
     ],
     [
       "Qual alternativa diferencia corretamente carbocátion e carbânion?",
@@ -627,7 +739,9 @@
         "Ambos apresentam carga neutra."
       ],
       1,
-      57
+      57,
+      "Reações orgânicas",
+      "O carbocátion tem carga positiva no carbono. O carbânion tem carga negativa."
     ],
     [
       "A reação de desidratação do hexan-3-ol pertence à classe das reações de:",
@@ -638,7 +752,9 @@
         "Polimerização."
       ],
       1,
-      58
+      58,
+      "Reações orgânicas",
+      "A saída de água e a perda de um hidrogênio vizinho podem formar uma ligação dupla."
     ],
     [
       "Na reação de esterificação entre ácido propanoico e propan-2-ol, os produtos formados são:",
@@ -649,7 +765,9 @@
         "Propano e oxigênio."
       ],
       0,
-      59
+      59,
+      "Reações orgânicas",
+      "A parte propanoato vem do ácido. O grupo isopropila vem do propan-2-ol."
     ],
     [
       "A transesterificação consiste em:",
@@ -660,7 +778,9 @@
         "Unir dois ácidos carboxílicos formando uma cetona."
       ],
       0,
-      60
+      60,
+      "Reações orgânicas",
+      "O álcool participante troca o grupo ligado ao oxigênio do éster."
     ]
   ],
   [
@@ -673,7 +793,9 @@
         "6."
       ],
       1,
-      61
+      61,
+      "Bioquímica e proteínas",
+      "Uma cadeia linear com cinco resíduos tem quatro ligações entre resíduos vizinhos."
     ],
     [
       "Na nomenclatura de um peptídeo, os aminoácidos são nomeados a partir da extremidade:",
@@ -684,7 +806,9 @@
         "Que apresenta maior massa molecular."
       ],
       1,
-      62
+      62,
+      "Bioquímica e proteínas",
+      "A sequência se lê a partir da extremidade com grupo amino livre."
     ],
     [
       "A leucina-encefalina apresenta a sequência Tyr-Gly-Gly-Phe-Leu. Qual aminoácido ocupa a extremidade carboxi-terminal?",
@@ -695,7 +819,9 @@
         "Leucina."
       ],
       3,
-      63
+      63,
+      "Bioquímica e proteínas",
+      "Na sequência convencional, o último resíduo é o que fica na extremidade carboxila."
     ],
     [
       "Uma proteína possui quatro cadeias polipeptídicas associadas, formando uma estrutura funcional. Esse nível de organização é denominado:",
@@ -706,7 +832,9 @@
         "Quaternário."
       ],
       3,
-      64
+      64,
+      "Bioquímica e proteínas",
+      "A estrutura quaternária descreve a associação entre duas ou mais cadeias."
     ],
     [
       "Uma mutação substitui um aminoácido hidrofóbico por um aminoácido carregado em uma região interna de uma proteína. Qual consequência pode ocorrer?",
@@ -717,7 +845,9 @@
         "Formação obrigatória de uma ligação fosfodiéster."
       ],
       1,
-      65
+      65,
+      "Bioquímica e proteínas",
+      "Uma carga no interior hidrofóbico pode alterar a estabilidade e o dobramento."
     ],
     [
       "A desnaturação de uma proteína geralmente provoca:",
@@ -728,7 +858,9 @@
         "A formação de novas sequências de aminoácidos."
       ],
       1,
-      66
+      66,
+      "Bioquímica e proteínas",
+      "A desnaturação modifica o dobramento e normalmente preserva a sequência peptídica."
     ],
     [
       "Uma enzima apresenta atividade máxima em determinada faixa de pH. Ao ser submetida a um pH muito diferente, sua atividade diminui. Isso ocorre principalmente porque:",
@@ -739,7 +871,9 @@
         "O pH elimina todas as ligações covalentes da molécula."
       ],
       0,
-      67
+      67,
+      "Bioquímica e proteínas",
+      "O pH afeta a protonação das cadeias laterais, inclusive no sítio ativo."
     ],
     [
       "Sobre a classificação EC das enzimas, assinale a alternativa correta:",
@@ -750,7 +884,9 @@
         "É um sistema utilizado exclusivamente para classificar proteínas estruturais."
       ],
       1,
-      68
+      68,
+      "Bioquímica e proteínas",
+      "O código EC agrupa enzimas conforme a reação catalisada."
     ],
     [
       "Em uma reação enzimática, a concentração de substrato aumenta progressivamente, enquanto a quantidade de enzima permanece constante. Em determinado momento, a velocidade da reação tende a atingir um limite. Esse comportamento ocorre porque:",
@@ -761,7 +897,9 @@
         "A enzima se transforma permanentemente em produto."
       ],
       1,
-      69
+      69,
+      "Bioquímica e proteínas",
+      "Em altas concentrações de substrato, a maioria dos sítios ativos fica ocupada."
     ],
     [
       "Uma enzima sofre aquecimento intenso e perde sua atividade catalítica. Qual explicação é mais adequada?",
@@ -772,7 +910,9 @@
         "O calor elimina exclusivamente os grupos fosfato da proteína."
       ],
       0,
-      70
+      70,
+      "Bioquímica e proteínas",
+      "Calor excessivo pode romper interações que mantêm o sítio ativo na forma funcional."
     ],
     [
       "Uma molécula de DNA apresenta 30% de adenina. Considerando o pareamento complementar das bases, qual é a porcentagem de guanina?",
@@ -783,7 +923,9 @@
         "40%."
       ],
       1,
-      71
+      71,
+      "Ácidos nucleicos",
+      "Em DNA dupla fita, A e T somam 60%. Os 40% restantes dividem-se entre G e C."
     ],
     [
       "Um nucleotídeo de DNA apresenta uma pentose denominada:",
@@ -794,7 +936,9 @@
         "Galactose."
       ],
       1,
-      72
+      72,
+      "Ácidos nucleicos",
+      "A desoxirribose tem um hidrogênio na posição 2′ em vez da hidroxila da ribose."
     ],
     [
       "A estrutura primária dos ácidos nucleicos corresponde:",
@@ -805,7 +949,9 @@
         "À associação entre cadeias de aminoácidos."
       ],
       0,
-      73
+      73,
+      "Ácidos nucleicos",
+      "A estrutura primária corresponde à ordem das bases na cadeia covalente."
     ],
     [
       "A desnaturação do DNA pode ocorrer quando a molécula é submetida a temperaturas elevadas. Isso acontece principalmente porque:",
@@ -816,7 +962,9 @@
         "As ligações fosfodiéster são obrigatoriamente destruídas."
       ],
       1,
-      74
+      74,
+      "Ácidos nucleicos",
+      "O aquecimento pode separar as fitas ao perturbar pareamento e empilhamento."
     ],
     [
       "A estrutura secundária do DNA está relacionada:",
@@ -827,7 +975,9 @@
         "À presença de ligações peptídicas entre nucleotídeos."
       ],
       1,
-      75
+      75,
+      "Ácidos nucleicos",
+      "Na dupla hélice, fitas antiparalelas se associam por pares de bases complementares."
     ],
     [
       "A sacarose é formada pela união de quais monossacarídeos?",
@@ -838,7 +988,9 @@
         "Frutose e galactose."
       ],
       1,
-      76
+      76,
+      "Carboidratos",
+      "A sacarose une glicose e frutose pelos dois carbonos anoméricos."
     ],
     [
       "A lactose é um dissacarídeo constituído por:",
@@ -849,7 +1001,9 @@
         "Duas moléculas de galactose."
       ],
       1,
-      77
+      77,
+      "Carboidratos",
+      "Na lactose, a galactose está ligada à glicose por uma ligação β(1→4)."
     ],
     [
       "A celulose e o amido são polissacarídeos formados por unidades de glicose. Entretanto, apresentam diferenças estruturais que explicam suas funções distintas. Qual alternativa está correta?",
@@ -860,7 +1014,9 @@
         "A celulose é um dissacarídeo e o amido é um monossacarídeo."
       ],
       0,
-      78
+      78,
+      "Carboidratos",
+      "A configuração β da celulose favorece fibras retas. As ligações α do amido favorecem outras formas."
     ],
     [
       "A diferença entre homopolissacarídeos e heteropolissacarídeos pode ser observada em sua composição. Assinale a alternativa correta:",
@@ -871,7 +1027,9 @@
         "Ambos são constituídos exclusivamente por lipídios."
       ],
       0,
-      79
+      79,
+      "Carboidratos",
+      "O critério é a variedade de monossacarídeos presentes, e não a extensão da cadeia."
     ],
     [
       "Durante a formação de uma ligação glicosídica entre dois monossacarídeos, geralmente ocorre:",
@@ -882,7 +1040,9 @@
         "Formação de uma ligação peptídica."
       ],
       0,
-      80
+      80,
+      "Carboidratos",
+      "Na representação de uma condensação, a formação da ligação equivale à remoção de água."
     ],
     [
       "Considere dois ácidos carboxílicos: ácido acético (CH₃COOH) e ácido cloroacético (ClCH₂COOH). Qual deles apresenta maior acidez e por quê?",
@@ -893,7 +1053,9 @@
         "Ácido acético, porque o cloro aumenta a densidade eletrônica da carboxila."
       ],
       1,
-      81
+      81,
+      "Ácidos e bases",
+      "O cloro polariza ligações e estabiliza a carga da base conjugada."
     ],
     [
       "O efeito de ressonância pode influenciar a acidez de compostos orgânicos porque:",
@@ -904,7 +1066,9 @@
         "Transforma ligações covalentes em ligações metálicas."
       ],
       0,
-      82
+      82,
+      "Ácidos e bases",
+      "Uma carga distribuída por ressonância pode tornar a base conjugada mais estável."
     ],
     [
       "Considere dois compostos com grupos retiradores de elétrons, um deles próximo e outro distante da carboxila. Qual apresenta maior influência sobre a acidez?",
@@ -915,7 +1079,9 @@
         "Nenhum deles influencia a acidez."
       ],
       1,
-      83
+      83,
+      "Ácidos e bases",
+      "O caráter retirador de elétrons é transmitido pelas ligações e diminui com a distância."
     ],
     [
       "A cadeia lateral do ácido aspártico apresenta comportamento ácido devido à presença de:",
@@ -926,7 +1092,9 @@
         "Um grupo fosfato."
       ],
       1,
-      84
+      84,
+      "Bioquímica e proteínas",
+      "A carboxila extra pode perder um próton, deixando a cadeia lateral com carga negativa."
     ],
     [
       "Entre os seguintes compostos, qual apresenta maior acidez?",
@@ -937,7 +1105,9 @@
         "Propano."
       ],
       1,
-      85
+      85,
+      "Ácidos e bases",
+      "A carga do fenolato se deslocaliza por ressonância, estabilizando a base conjugada."
     ],
     [
       "Na reação entre fenol e hidróxido de sódio, ocorre a formação de fenolato de sódio e água. Essa reação é classificada principalmente como:",
@@ -948,7 +1118,9 @@
         "Reação de oxidação do anel aromático."
       ],
       0,
-      86
+      86,
+      "Ácidos e bases",
+      "O hidróxido recebe o próton do fenol, gerando fenolato e água."
     ],
     [
       "A adição de dois equivalentes de HCl ao pent-2-ino pode produzir, em condições adequadas, um di-haleto geminal. Qual é a principal característica desse produto?",
@@ -959,7 +1131,9 @@
         "O produto não possui átomos de hidrogênio."
       ],
       0,
-      87
+      87,
+      "Reações orgânicas",
+      "Geminal significa que os dois substituintes ocupam o mesmo carbono."
     ],
     [
       "Na reação de nitração do benzeno, utilizando ácido nítrico em presença de ácido sulfúrico, ocorre:",
@@ -970,7 +1144,9 @@
         "Substituição radicalar, formando um alcano."
       ],
       0,
-      88
+      88,
+      "Reações orgânicas",
+      "Numa substituição aromática, um hidrogênio do anel dá lugar ao grupo nitro."
     ],
     [
       "Na ozonólise do eteno, a ligação dupla carbono-carbono é rompida. Considerando a reação com tratamento redutivo, qual produto orgânico é formado?",
@@ -981,7 +1157,9 @@
         "Ácido etanoico."
       ],
       1,
-      89
+      89,
+      "Reações orgânicas",
+      "A clivagem de cada carbono do eteno gera metanal no tratamento redutivo."
     ],
     [
       "Na esterificação entre ácido hexanoico e hexan-1-ol, seguida de uma reação de transesterificação com propanol, qual será o éster formado na segunda reação?",
@@ -992,7 +1170,9 @@
         "Etanoato de propila."
       ],
       0,
-      90
+      90,
+      "Reações orgânicas",
+      "Permanece a parte hexanoato do ácido. O propanol fornece o novo grupo propila."
     ]
   ]
 ]

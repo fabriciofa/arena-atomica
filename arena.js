@@ -368,7 +368,7 @@ function createArena(canvas) {
         return {
           id,index,
           bob:reduce.matches ? 0 : Math.sin(now/290+index)*.055,
-          x:direction*(-3.65+(attacking ? swing*.36 : 0)-retreat),
+          x:roster.length===1 ? 0 : direction*(-3.65+(attacking ? swing*.36 : 0)-retreat),
           z:.65+(dodge ? swing*(index ? 1.4 : -1.4) : 0),
           guard:attacking?swing:0,
           lean:direction*(attacking ? swing*.12 : -retreat*.29),
@@ -377,7 +377,15 @@ function createArena(canvas) {
       });
       pose.sort((a,b)=>a.z-b.z).forEach(p=>{
         if(p.index===eliminated) skeleton(p.index ? 3.65 : -3.65,.65);
-        else fighter(p.id,p.index,p.x,p.z,p.bob,p.guard,p.lean,p.duck);
+        else if(roster.length===1) {
+          const [cx,cy]=project([p.x,0,p.z]);
+          ctx.save();
+          ctx.translate(cx,cy);
+          ctx.scale(1.75,1.75);
+          ctx.translate(-cx,-cy);
+          fighter(p.id,p.index,p.x,p.z,p.bob,p.guard,p.lean,p.duck);
+          ctx.restore();
+        } else fighter(p.id,p.index,p.x,p.z,p.bob,p.guard,p.lean,p.duck);
       });
 
       if(motion && !finalMove) motion.correct.forEach((fired,index)=>{
