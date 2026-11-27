@@ -29,11 +29,11 @@
   <section id="auth-view" class="panel auth-panel" aria-labelledby="auth-title">
     <h2 id="auth-title">Entrar na Arena</h2>
     <form id="auth-form">
-      <label id="auth-name-row" hidden>Nome de exibição <input id="auth-name" name="name" autocomplete="nickname" minlength="2" maxlength="24"></label>
-      <label>E-mail <input id="auth-email" name="email" type="email" autocomplete="email" maxlength="254" required></label>
-      <label>Senha <input id="auth-password" name="password" type="password" autocomplete="current-password" maxlength="256" required></label>
+      <label id="auth-name-row" hidden><span id="auth-name-label">Nome de exibição</span> <input id="auth-name" aria-labelledby="auth-name-label" name="name" aria-describedby="auth-name-error" autocomplete="nickname" minlength="2" maxlength="24"><span id="auth-name-error" class="auth-field-error" hidden></span></label>
+      <label><span id="auth-email-label">E-mail</span> <input id="auth-email" aria-labelledby="auth-email-label" name="email" aria-describedby="auth-email-error" type="email" autocomplete="email" maxlength="254" required><span id="auth-email-error" class="auth-field-error" hidden></span></label>
+      <label><span id="auth-password-label">Senha</span> <input id="auth-password" aria-labelledby="auth-password-label" name="password" aria-describedby="auth-password-error" type="password" autocomplete="current-password" maxlength="256" required><span id="auth-password-error" class="auth-field-error" hidden></span></label>
       <button id="auth-toggle-password" class="link-button" type="button" aria-pressed="false">Mostrar senha</button>
-      <label id="auth-confirm-row" hidden>Confirmar senha <input id="auth-confirm" name="confirmation" type="password" autocomplete="new-password" minlength="12" maxlength="256"></label>
+      <label id="auth-confirm-row" hidden><span id="auth-confirm-label">Confirmar senha</span> <input id="auth-confirm" aria-labelledby="auth-confirm-label" name="confirmation" aria-describedby="auth-confirm-error" type="password" autocomplete="new-password" minlength="12" maxlength="256"><span id="auth-confirm-error" class="auth-field-error" hidden></span></label>
       <label id="auth-claim-row" class="auth-check" hidden><input type="checkbox" id="auth-claim"> Transferir os duelos do perfil antigo deste navegador</label>
       <button id="auth-submit" type="submit" class="primary">Entrar</button>
     </form>

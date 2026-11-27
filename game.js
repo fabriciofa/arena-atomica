@@ -600,9 +600,50 @@ async function action(name,payload) {
   }
 }
 
+const authFields={name:'auth-name',email:'auth-email',password:'auth-password',confirmation:'auth-confirm'};
+
+function setAuthFieldError(field,message='') {
+  const id=authFields[field];
+  if(!id) return;
+  const input=$(id);
+  const hint=$(id+'-error');
+  if(message) input.setAttribute('aria-invalid','true');
+  else input.removeAttribute('aria-invalid');
+  hint.textContent=message;
+  hint.hidden=!message;
+}
+
+function showAuthFieldErrors(errors={}) {
+  Object.keys(authFields).forEach(field=>setAuthFieldError(field,errors[field]));
+  const first=Object.keys(authFields).find(field=>errors[field]);
+  if(first) $(authFields[first]).focus();
+}
+
+function registrationErrors() {
+  const errors={};
+  const name=$('auth-name').value.trim();
+  const email=$('auth-email').value.trim();
+  const password=$('auth-password').value;
+  const confirmation=$('auth-confirm').value;
+  const bytes=value=>new TextEncoder().encode(value).length;
+  if([...name].length<2 || [...name].length>24 || /[\p{C}\p{Z}]/u.test(name.replaceAll(' ',''))) {
+    errors.name='Informe um nome de exibição de 2 a 24 caracteres.';
+  }
+  if(!/^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/u.test(email) || bytes(email)>254) {
+    errors.email='Informe um e-mail válido, como nome@exemplo.com.';
+  }
+  if([...password].length<12 || bytes(password)>256) {
+    errors.password='Use uma senha com pelo menos 12 caracteres e até 256 bytes.';
+  }
+  if(!confirmation) errors.confirmation='Confirme sua senha.';
+  else if(confirmation!==password) errors.confirmation='As senhas não coincidem.';
+  return errors;
+}
+
 let authMode='login';
 function updateAuthForm() {
   const register=authMode==='register';
+  $('auth-form').noValidate=register;
   $('auth-title').textContent=register ? 'Criar conta' : 'Entrar na Arena';
   $('auth-name-row').hidden=!register;
   $('auth-confirm-row').hidden=!register;
@@ -628,10 +669,12 @@ async function authAction(mode,payload) {
     });
     const result=await response.json();
     if(!response.ok) {
+      if(mode==='register') showAuthFieldErrors(result.fieldErrors);
       $('auth-feedback').textContent=result.error || 'Não foi possível continuar.';
       return;
     }
     $('auth-form').reset();
+    showAuthFieldErrors();
     $('auth-password').type='password';
     $('auth-toggle-password').textContent='Mostrar senha';
     $('auth-toggle-password').setAttribute('aria-pressed','false');
@@ -653,6 +696,7 @@ async function authAction(mode,payload) {
 
 $('auth-mode').addEventListener('click',()=>{
   authMode=authMode==='login' ? 'register' : 'login';
+  showAuthFieldErrors();
   $('auth-feedback').textContent='';
   updateAuthForm();
 });
@@ -662,8 +706,32 @@ $('auth-toggle-password').addEventListener('click',()=>{
   $('auth-toggle-password').textContent=shown ? 'Ocultar senha' : 'Mostrar senha';
   $('auth-toggle-password').setAttribute('aria-pressed',String(shown));
 });
+for(const [field,id] of Object.entries(authFields)) {
+  $(id).addEventListener('input',()=>{
+    if(authMode!=='register') return;
+    const errors=registrationErrors();
+    if($(id).hasAttribute('aria-invalid')) setAuthFieldError(field,errors[field]);
+    if(field==='password' && $('auth-confirm').hasAttribute('aria-invalid')) {
+      setAuthFieldError('confirmation',errors.confirmation);
+    }
+    if(!Object.values(authFields).some(input=>$(input).hasAttribute('aria-invalid'))) {
+      $('auth-feedback').textContent='';
+    }
+  });
+}
+
 $('auth-form').addEventListener('submit',event=>{
   event.preventDefault();
+  if(pending) return;
+  $('auth-feedback').textContent='';
+  if(authMode==='register') {
+    const errors=registrationErrors();
+    showAuthFieldErrors(errors);
+    if(Object.keys(errors).length) {
+      $('auth-feedback').textContent='Revise os campos indicados.';
+      return;
+    }
+  }
   authAction(authMode,{
     name:$('auth-name').value,email:$('auth-email').value,password:$('auth-password').value,
     confirmation:$('auth-confirm').value,claimLegacy:!$('auth-claim-row').hidden && $('auth-claim').checked,

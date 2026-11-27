@@ -291,3 +291,5 @@ body:not([data-screen=result]) .result-effect{display:none}
 .auth-panel form .auth-check{display:flex;align-items:center;gap:7px}
 .auth-panel form .link-button{justify-self:start}
 .auth-panel .panel-note{min-height:0;margin:8px 0}
+.auth-field-error{color:#ffb6c7;font-size:12px;font-weight:650}
+.auth-panel input[aria-invalid=true]{border-color:#ee8ca5;box-shadow:inset 3px 0 #ee8ca5}

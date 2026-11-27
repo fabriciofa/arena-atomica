@@ -532,7 +532,7 @@ class Handler(BaseHTTPRequestHandler):
             if action == "register":
                 token, error = accounts.register(payload, self.cookie("reacao"), now)
                 if error:
-                    self.json(400, {"error": error})
+                    self.json(400, error)
                     return
             else:
                 token = accounts.login(payload, now)

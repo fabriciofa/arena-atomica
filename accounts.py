@@ -33,18 +33,27 @@ def password_hash(password, salt):
     return hashlib.scrypt(password.encode("utf-8"), salt=salt, n=2**15, r=8, p=1, maxmem=64 * 1024**2)
 
 
-def credentials(data):
-    email = data.get("email")
-    password = data.get("password")
-    if not isinstance(email, str) or not isinstance(password, str):
-        return None
-    email = email.strip().casefold()
+def normalized_email(value):
+    if isinstance(value, str):
+        email = value.strip().casefold()
+        if utf8_length(email, 254) and EMAIL.fullmatch(email):
+            return email
+    return None
+
+
+def utf8_length(value, maximum):
     try:
-        if not 1 <= len(email.encode("utf-8")) <= 254 or not 1 <= len(password.encode("utf-8")) <= 256:
-            return None
+        return isinstance(value, str) and 1 <= len(value.encode("utf-8")) <= maximum
     except UnicodeError:
-        return None
-    return (email, password) if EMAIL.fullmatch(email) else None
+        return False
+
+
+def credentials(data):
+    email = normalized_email(data.get("email"))
+    password = data.get("password")
+    if email and utf8_length(password, 256):
+        return email, password
+    return None
 
 
 class Accounts:
@@ -66,28 +75,38 @@ class Accounts:
             return self.legacy_player(db, token) is not None
 
     def register(self, data, legacy, now):
-        submitted = credentials(data)
+        errors = {}
         name = data.get("name")
-        if (not isinstance(name, str) or not name.isprintable() or
-                not 2 <= len(name.strip()) <= 24 or submitted is None):
-            return None, "Informe um nome de 2 a 24 caracteres e um e-mail válido."
-        email, password = submitted
-        if len(password) < 12 or password != data.get("confirmation"):
-            return None, "Use pelo menos 12 caracteres e confirme a mesma senha."
+        email = normalized_email(data.get("email"))
+        password = data.get("password")
+        if not isinstance(name, str) or not name.isprintable() or not 2 <= len(name.strip()) <= 24:
+            errors["name"] = "Informe um nome de exibição de 2 a 24 caracteres."
+        if email is None:
+            errors["email"] = "Informe um e-mail válido."
+        if not utf8_length(password, 256) or len(password) < 12:
+            errors["password"] = "Use uma senha com pelo menos 12 caracteres e até 256 bytes."
+        confirmation = data.get("confirmation")
+        if not confirmation:
+            errors["confirmation"] = "Confirme sua senha."
+        elif password != confirmation:
+            errors["confirmation"] = "As senhas não coincidem."
+        if errors:
+            return None, {"error": "Revise os campos indicados.", "fieldErrors": errors}
         salt = secrets.token_bytes(16)
         password_key = password_hash(password, salt)
         with closing(self.connect()) as db:
             db.execute("BEGIN IMMEDIATE")
             if db.execute("SELECT 1 FROM accounts WHERE email=?", (email,)).fetchone():
-                return None, "Já existe uma conta com esse e-mail."
+                return None, {"error": "Revise os campos indicados.",
+                              "fieldErrors": {"email": "Já existe uma conta com esse e-mail."}}
             player = secrets.token_urlsafe(32)
             if data.get("claimLegacy") is True:
                 if not legacy or self.legacy_player(db, legacy) is None:
-                    return None, "O histórico deste navegador já foi transferido ou está indisponível."
+                    return None, {"error": "O histórico deste navegador já foi transferido ou está indisponível."}
                 active = db.execute("""SELECT 1 FROM matches
                                        WHERE ended IS NULL AND (first=? OR second=?)""", (legacy, legacy)).fetchone()
                 if active:
-                    return None, "Aguarde o encerramento do duelo antigo para transferir o histórico."
+                    return None, {"error": "Aguarde o encerramento do duelo antigo para transferir o histórico."}
                 player = legacy
                 db.execute("UPDATE players SET name=?, ready=NULL, seen=? WHERE token=?", (name.strip(), now, player))
             else:

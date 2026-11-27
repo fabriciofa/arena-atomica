@@ -68,7 +68,9 @@ class HttpTest(unittest.TestCase):
             self.assertEqual(db.execute("SELECT COUNT(*) FROM players").fetchone()[0], 0)
         self.assertEqual(self.post("/api/ready", {"chemist": "curie"})[0], 401)
         one = self.session("MARIE@example.com")
-        self.assertEqual(self.register("marie@example.com")[0], 400)
+        duplicate_status, _, duplicate_body = self.register("marie@example.com")
+        self.assertEqual(duplicate_status, 400)
+        self.assertIn("email", json.loads(duplicate_body)["fieldErrors"])
         self.assertEqual(self.post("/api/auth/login", {"email": "marie@example.com", "password": "errada"})[0], 401)
         _, headers, _ = self.post("/api/auth/login", {"email": "marie@example.com", "password": self.password})
         two = headers["Set-Cookie"].split(";")[0]
@@ -82,7 +84,12 @@ class HttpTest(unittest.TestCase):
 
     def test_password_confirmation_and_session_expiry(self):
         invalid = {"name": "Marie", "email": "marie@example.com", "password": self.password, "confirmation": "different"}
-        self.assertEqual(self.post("/api/auth/register", invalid)[0], 400)
+        status, _, body = self.post("/api/auth/register", invalid)
+        self.assertEqual(status, 400)
+        self.assertEqual(set(json.loads(body)["fieldErrors"]), {"confirmation"})
+        status, _, body = self.post("/api/auth/register", {})
+        self.assertEqual(status, 400)
+        self.assertEqual(set(json.loads(body)["fieldErrors"]), {"name", "email", "password", "confirmation"})
         with patch("server.time.time", return_value=100):
             cookie = self.session("marie@example.com")
         with patch("server.time.time", return_value=100 + server.SESSION_SECONDS):
